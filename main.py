@@ -1,9 +1,15 @@
+import os
 import time
 
 import pygame as pg
 
 import render
 import tick
+
+
+class MainData:
+	texture: any
+	texture2: any
 
 
 def main():
@@ -18,6 +24,12 @@ def main():
 	last_time = time.time_ns()
 	tick_time_carry = 0
 	y = 0
+	main_data = MainData()
+	main_dir = os.path.split(os.path.abspath(__file__))[0]
+	image_name = os.path.join(main_dir, "image.png")
+	main_data.texture = pg.image.load(image_name)
+	image_name = os.path.join(main_dir, "image2.png")
+	main_data.texture2 = pg.image.load(image_name)
 	
 	# Main game loop
 	running = 1
@@ -46,7 +58,7 @@ def main():
 		tick_time_carry = delta_time % 10000000
 		
 		# Render game
-		render.render(screen, y)
+		render.render(main_data, screen, y)
 
 
 if __name__ == "__main__":
