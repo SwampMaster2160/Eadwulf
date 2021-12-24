@@ -1,2 +1,2 @@
-def tick(y: int) -> int:
-	return (y + 1) % 100
+def tick():
+	pass
