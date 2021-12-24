@@ -1,10 +1,26 @@
 class Texture:
-	PATH = ""
+	FILENAME = ""
 
 
 class Error(Texture):
-	PATH = "error"
+	FILENAME = "error"
 	
 
 class Grass(Texture):
-	PATH = "grass"
+	FILENAME = "grass"
+	
+
+class PlayerNorth(Texture):
+	FILENAME = "player_north"
+	
+
+class PlayerEast(Texture):
+	FILENAME = "player_east"
+	
+
+class PlayerSouth(Texture):
+	FILENAME = "player_south"
+	
+
+class PlayerWest(Texture):
+	FILENAME = "player_west"

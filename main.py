@@ -6,6 +6,7 @@ import pygame as pg
 import render
 import tick
 from common_data import CommonData
+from player import Player
 from texture import Texture
 
 
@@ -19,6 +20,7 @@ def main():
 	common_data.window_size = windowed_size
 	pg.display.set_caption("Eadwulf")
 	fullscreen = 0
+	common_data.player = Player()
 	
 	# Init game vars
 	last_time = time.time_ns()
@@ -27,7 +29,7 @@ def main():
 	
 	main_dir = os.path.split(os.path.abspath(__file__))[0]
 	for texture in Texture.__subclasses__():
-		common_data.texture_dict[texture] = pg.image.load(os.path.join(main_dir, "res", "texture", texture.PATH + ".png"))
+		common_data.texture_dict[texture] = pg.image.load(os.path.join(main_dir, "res", "texture", texture.FILENAME + ".png"))
 	
 	# Main game loop
 	running = 1
@@ -56,7 +58,7 @@ def main():
 		delta_time = time_ns - last_time + tick_time_carry
 		last_time = time_ns
 		for x in range(delta_time // 10000000):
-			tick.tick()
+			tick.tick(common_data)
 		tick_time_carry = delta_time % 10000000
 		
 		# Render game
