@@ -4,6 +4,8 @@ from typing import Sequence, Tuple
 import pygame as pg
 
 import texture
+from pixel_pos import PixelPos
+from tile_pos import TilePos
 from world_renderer import WorldRenderer
 
 
@@ -20,8 +22,7 @@ class CardinalDirection(Enum):
 
 
 class Player:
-	x: int = 0
-	y: int = 0
+	pos: TilePos = TilePos(0, 0)
 	offset: int = 0
 	player_state: PlayerState = PlayerState.IDLE
 	facing: CardinalDirection = CardinalDirection.NORTH
@@ -51,15 +52,15 @@ class Player:
 					self.offset = 0
 					match self.facing:
 						case CardinalDirection.NORTH:
-							self.y -= 1
+							self.pos.y -= 1
 						case CardinalDirection.EAST:
-							self.x += 1
+							self.pos.x += 1
 						case CardinalDirection.SOUTH:
-							self.y += 1
+							self.pos.y += 1
 						case CardinalDirection.WEST:
-							self.x -= 1
+							self.pos.x -= 1
 	
-	def get_offset_x_and_y(self) -> Tuple[int, int]:
+	def get_offset_x_and_y(self) -> PixelPos:
 		x = 0
 		y = 0
 		match self.facing:
@@ -71,7 +72,7 @@ class Player:
 				y = self.offset
 			case CardinalDirection.WEST:
 				x = -self.offset
-		return x, y
+		return PixelPos(x, y)
 	
 	def render(self, world_renderer: WorldRenderer):
 		player_texture = None
@@ -84,5 +85,4 @@ class Player:
 				player_texture = texture.PlayerSouth
 			case CardinalDirection.WEST:
 				player_texture = texture.PlayerWest
-		x_offset, y_offset = self.get_offset_x_and_y()
-		world_renderer.render_texture(player_texture, (self.x * 16 + x_offset, self.y * 16 + y_offset))
+		world_renderer.render_texture(player_texture, self.get_offset_x_and_y() + self.pos.get_pixel_pos())
