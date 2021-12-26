@@ -12,10 +12,10 @@ from world_renderer import WorldRenderer
 def main():
 	# Init window
 	pg.init()
-	main_surface = pg.display.set_mode((640, 480), flags=pg.RESIZABLE, vsync=1)
-	windowed_size = pg.display.get_window_size()
+	main_surface = pg.display.set_mode(flags=pg.FULLSCREEN, vsync=1)
+	windowed_size = (640, 480)
 	pg.display.set_caption("Eadwulf")
-	fullscreen = 0
+	fullscreen = 1
 	
 	# Init game vars
 	last_time = time.time_ns()
