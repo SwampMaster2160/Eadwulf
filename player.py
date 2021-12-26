@@ -78,11 +78,11 @@ class Player:
 		player_texture = None
 		match self.facing:
 			case CardinalDirection.NORTH:
-				player_texture = texture.PlayerNorth
+				player_texture = texture.PlayerNorthTexture
 			case CardinalDirection.EAST:
-				player_texture = texture.PlayerEast
+				player_texture = texture.PlayerEastTexture
 			case CardinalDirection.SOUTH:
-				player_texture = texture.PlayerSouth
+				player_texture = texture.PlayerSouthTexture
 			case CardinalDirection.WEST:
-				player_texture = texture.PlayerWest
+				player_texture = texture.PlayerWestTexture
 		world_renderer.render_texture(player_texture, self.get_offset_x_and_y() + self.pos.get_pixel_pos())

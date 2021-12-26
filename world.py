@@ -1,6 +1,4 @@
-import tile
 from chunk import Chunk
-from chunk_pos import ChunkPos
 from player import Player
 from tile_pos import TilePos
 from tile_stack import TileStack
