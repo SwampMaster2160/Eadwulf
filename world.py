@@ -1,6 +1,8 @@
 import texture
+import tile
 from player import Player
 from tile_pos import TilePos
+from tile_stack import TileStack
 from world_renderer import WorldRenderer
 
 
@@ -10,7 +12,9 @@ class World:
 			offset = -(world_renderer.world_surface_width_in_tiles // 2) + player.pos.x
 			for x in range(offset, world_renderer.world_surface_width_in_tiles + offset):
 				pos = TilePos(x, y)
-				if x == 0 or y == 0:
-					world_renderer.render_texture(texture.Error, pos.get_pixel_pos())
-				else:
-					world_renderer.render_texture(texture.Grass, pos.get_pixel_pos())
+				self[pos].render(world_renderer, pos)
+
+	def __getitem__(self, item: TilePos) -> TileStack:
+		if item.x == 0 or item.y == 0:
+			return TileStack([tile.Tile()])
+		return TileStack([tile.GrassTile()])
