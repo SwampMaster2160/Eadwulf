@@ -28,7 +28,7 @@ class TilePos:
 		random.seed(hash((self.x, self.y, seed, layer)))
 		return random.random()
 
-	def perlin(self, seed: int, layer_min: int, layer_max: int) -> float:
+	def perlin(self, seed: int, layer_min: int, layer_max: int, layer_offset: int) -> float:
 		height = 0.
 		for layer in range(layer_min, layer_max):
 			layer_size = 1 << layer
@@ -36,10 +36,10 @@ class TilePos:
 			layer_start_y = self.y // layer_size * layer_size
 			layer_start = TilePos(layer_start_x, layer_start_y)
 
-			height_0 = layer_start.random(seed, layer)
-			height_1 = (layer_start + TilePos(layer_size, 0)).random(seed, layer)
-			height_2 = (layer_start + TilePos(0, layer_size)).random(seed, layer)
-			height_3 = (layer_start + TilePos(layer_size, layer_size)).random(seed, layer)
+			height_0 = layer_start.random(seed, layer - layer_min + layer_offset)
+			height_1 = (layer_start + TilePos(layer_size, 0)).random(seed, layer - layer_min + layer_offset)
+			height_2 = (layer_start + TilePos(0, layer_size)).random(seed, layer - layer_min + layer_offset)
+			height_3 = (layer_start + TilePos(layer_size, layer_size)).random(seed, layer - layer_min + layer_offset)
 
 			x_gradient_0 = (height_1 - height_0) / layer_size
 			p_0 = x_gradient_0 * self.x + (height_0 - x_gradient_0 * layer_start_x)

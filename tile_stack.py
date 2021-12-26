@@ -1,4 +1,3 @@
-import random
 from typing import List
 
 import tile
@@ -11,11 +10,22 @@ class TileStack:
 	tiles: List[Tile] = []
 
 	def __init__(self, pos: TilePos):
-		if pos.perlin(42042034, 1, 5) < 16:
+		ground_height = pos.perlin(420420, 1, 5, 0)
+		sand_type_map = pos.perlin(420420, 4, 6, 4)
+		if ground_height < 16:
 			self.tiles = [tile.WaterTile()]
+		elif ground_height < 18:
+			if sand_type_map < 24:
+				self.tiles = [tile.SandTile()]
+			elif sand_type_map < 32:
+				self.tiles = [tile.BlackSandTile()]
+			else:
+				self.tiles = [tile.GravelTile()]
+		elif ground_height > 22:
+			self.tiles = [tile.GrassTile(), tile.TreeTile()]
 		else:
 			self.tiles = [tile.GrassTile()]
-			if pos.random(42042034, 5) > 0.95:
+			if pos.random(420420, 7) > 0.95:
 				self.tiles.append(tile.TreeTile())
 
 	def render(self, world_renderer: WorldRenderer, pos: TilePos):
