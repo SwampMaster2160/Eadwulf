@@ -11,13 +11,13 @@ class TileStack:
 	tiles: List[Tile] = []
 
 	def __init__(self, pos: TilePos):
-		if pos.x == 0 or pos.y == 0 or random.randint(0, 1):
+		if pos.perlin(42042034, 1, 5) < 16:
 			self.tiles = [tile.WaterTile()]
 		else:
 			self.tiles = [tile.GrassTile()]
-			if random.randint(0, 1):
+			if pos.random(42042034, 5) > 0.95:
 				self.tiles.append(tile.TreeTile())
 
 	def render(self, world_renderer: WorldRenderer, pos: TilePos):
-		for tile in self.tiles:
-			tile.render(world_renderer, pos)
+		for chunk_tile in self.tiles:
+			chunk_tile.render(world_renderer, pos)
