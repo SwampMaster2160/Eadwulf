@@ -1,5 +1,6 @@
 from typing import List
 
+import texture
 import tile
 from tile import Tile
 from tile_pos import TilePos
@@ -31,3 +32,5 @@ class TileStack:
 	def render(self, world_renderer: WorldRenderer, pos: TilePos):
 		for chunk_tile in self.tiles:
 			chunk_tile.render(world_renderer, pos)
+		if not self.tiles:
+			world_renderer.render_texture(texture.PitBottomTexture, pos.get_pixel_pos())

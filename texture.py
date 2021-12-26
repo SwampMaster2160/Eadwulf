@@ -30,8 +30,8 @@ class GravelTexture(Texture):
 	FILENAME = "gravel"
 
 
-class RockTexture(Texture):
-	FILENAME = "rock"
+class PitBottomTexture(Texture):
+	FILENAME = "pit_bottom"
 
 
 class PathTexture(Texture):

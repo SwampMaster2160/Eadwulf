@@ -1,9 +1,10 @@
 from enum import Enum, auto
-from typing import Sequence, Tuple
+from typing import Sequence
 
 import pygame as pg
 
 import texture
+from gui_renderer import GUIRenderer, GUITextureAlign
 from pixel_pos import PixelPos
 from tile_pos import TilePos
 from world_renderer import WorldRenderer
@@ -26,8 +27,27 @@ class Player:
 	offset: int = 0
 	player_state: PlayerState = PlayerState.IDLE
 	facing: CardinalDirection = CardinalDirection.NORTH
+
+	selected_item: int = 0
 	
-	def tick(self, keys_pressed: Sequence[bool]):
+	def tick(self, keys_pressed: Sequence[bool], keys_pressed_this_tick: dict):
+		if keys_pressed_this_tick[pg.K_LEFT]:
+			self.selected_item -= 1
+			if self.selected_item % 10 == 9:
+				self.selected_item += 10
+			if self.selected_item > 49:
+				self.selected_item = 9
+		if keys_pressed_this_tick[pg.K_RIGHT]:
+			self.selected_item += 1
+			if self.selected_item % 10 == 0:
+				self.selected_item -= 10
+			if self.selected_item > 49:
+				self.selected_item = 39
+		if keys_pressed_this_tick[pg.K_UP]:
+			self.selected_item = (self.selected_item - 10) % 50
+		if keys_pressed_this_tick[pg.K_DOWN]:
+			self.selected_item = (self.selected_item + 10) % 50
+
 		match self.player_state:
 			case PlayerState.IDLE:
 				is_w_pressed = keys_pressed[pg.K_w]
@@ -73,7 +93,22 @@ class Player:
 			case CardinalDirection.WEST:
 				x = -self.offset
 		return PixelPos(x, y)
-	
+
+	def render_gui(self, gui_renderer: GUIRenderer):
+		for y in range(5):
+			for x in range(10):
+				item_index = y * 10 + x
+				color = (0, 0, 0, 127)
+				if x % 2 != y % 2:
+					color = (31, 31, 31, 127)
+				gui_renderer.render_rect(color, PixelPos(x * 16, y * 16), PixelPos(16, 16), GUITextureAlign.TOP_LEFT)
+		gui_renderer.render_rect(
+			(0, 0, 0, 191),
+			PixelPos(self.selected_item % 10 * 16, self.selected_item // 10 * 16),
+			PixelPos(16, 16),
+			GUITextureAlign.TOP_LEFT
+		)
+
 	def render(self, world_renderer: WorldRenderer):
 		player_texture = None
 		match self.facing:

@@ -34,9 +34,5 @@ class GravelTile(Tile):
 	TEXTURE = texture.GravelTexture
 
 
-class RockTile(Tile):
-	TEXTURE = texture.RockTexture
-
-
 class PathTile(Tile):
 	TEXTURE = texture.PathTexture

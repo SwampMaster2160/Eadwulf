@@ -3,6 +3,7 @@ import time
 
 import pygame as pg
 
+from gui_renderer import GUIRenderer
 from player import Player
 from texture import Texture
 from world import World
@@ -20,6 +21,7 @@ def main():
 	# Init game vars
 	last_time = time.time_ns()
 	tick_time_carry = 0
+	keys_pressed_last_tick = pg.key.get_pressed()
 	
 	player = Player()
 	world = World()
@@ -54,16 +56,30 @@ def main():
 		delta_time = time_ns - last_time + tick_time_carry
 		last_time = time_ns
 		for x in range(delta_time // 10000000):
-			player.tick(pg.key.get_pressed())
+			keys_pressed = pg.key.get_pressed()
+			keys_pressed_this_tick = {}
+			keycodes = [pg.K_LEFT, pg.K_RIGHT, pg.K_UP, pg.K_DOWN]
+			for key in keycodes:
+				if keys_pressed[key] and not keys_pressed_last_tick[key]:
+					keys_pressed_this_tick[key] = 1
+				else:
+					keys_pressed_this_tick[key] = 0
+
+			player.tick(keys_pressed, keys_pressed_this_tick)
+
+			keys_pressed_last_tick = keys_pressed
 		tick_time_carry = delta_time % 10000000
 		
 		# Render game
 		world_renderer = WorldRenderer(main_surface, texture_dict, player)
+		gui_renderer = GUIRenderer(texture_dict)
 		
 		world.render(world_renderer, player)
 		player.render(world_renderer)
+		player.render_gui(gui_renderer)
 		
 		world_renderer.blit_onto_main_surface(main_surface, player)
+		gui_renderer.blit_onto_main_surface(main_surface)
 		pg.display.flip()
 
 
