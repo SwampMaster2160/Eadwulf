@@ -5,6 +5,7 @@ import pygame as pg
 
 import item
 import texture
+import tile
 from gui_renderer import GUIRenderer, GUITextureAlign
 from item import Item
 from pixel_pos import PixelPos
@@ -28,14 +29,44 @@ class Player:
 	pos: TilePos = TilePos(0, 0)
 	offset: int = 0
 	player_state: PlayerState = PlayerState.IDLE
+	traveling: CardinalDirection = CardinalDirection.NORTH
 	facing: CardinalDirection = CardinalDirection.NORTH
 
 	selected_item: int = 0
 	inventory: List[Item] = [item.NullItem()] * 50
 
+	def looking_at_pos(self):
+		match self.facing:
+			case CardinalDirection.NORTH:
+				return self.pos + TilePos(0, -1)
+			case CardinalDirection.EAST:
+				return self.pos + TilePos(1, 0)
+			case CardinalDirection.SOUTH:
+				return self.pos + TilePos(0, 1)
+			case CardinalDirection.WEST:
+				return self.pos + TilePos(-1, 0)
+
+	def traveling_to_pos(self):
+		match self.traveling:
+			case CardinalDirection.NORTH:
+				return self.pos + TilePos(0, -1)
+			case CardinalDirection.EAST:
+				return self.pos + TilePos(1, 0)
+			case CardinalDirection.SOUTH:
+				return self.pos + TilePos(0, 1)
+			case CardinalDirection.WEST:
+				return self.pos + TilePos(-1, 0)
+
 	def __init__(self):
 		self.inventory[0] = item.ShovelItem()
 		self.inventory[1] = item.HammerItem()
+		self.inventory[2] = item.AcornItem()
+		self.inventory[3] = item.TileItem(tile.GrassTile())
+		self.inventory[4] = item.TileItem(tile.SandTile())
+		self.inventory[5] = item.TileItem(tile.BlackSandTile())
+		self.inventory[6] = item.TileItem(tile.GravelTile())
+		self.inventory[7] = item.TileItem(tile.WaterTile())
+		self.inventory[8] = item.TileItem(tile.PathTile())
 	
 	def tick(self, keys_pressed: Sequence[bool], keys_pressed_this_tick: dict, world):
 		if keys_pressed_this_tick[pg.K_LEFT]:
@@ -58,39 +89,37 @@ class Player:
 		match self.player_state:
 			case PlayerState.IDLE:
 				if keys_pressed_this_tick[pg.K_RETURN]:
-					use_pos = self.pos
-					match self.facing:
-						case CardinalDirection.NORTH:
-							use_pos += TilePos(0, -1)
-						case CardinalDirection.EAST:
-							use_pos += TilePos(1, 0)
-						case CardinalDirection.SOUTH:
-							use_pos += TilePos(0, 1)
-						case CardinalDirection.WEST:
-							use_pos += TilePos(-1, 0)
-					self.inventory[self.selected_item].use(world[use_pos])
-
+					self.inventory[self.selected_item].use(world[self.looking_at_pos()])
 				is_w_pressed = keys_pressed[pg.K_w]
 				is_a_pressed = keys_pressed[pg.K_a]
 				is_s_pressed = keys_pressed[pg.K_s]
 				is_d_pressed = keys_pressed[pg.K_d]
-				if is_w_pressed or is_a_pressed or is_s_pressed or is_d_pressed:
+				if is_w_pressed:
+					self.traveling = CardinalDirection.NORTH
+					if not keys_pressed[pg.K_LCTRL]:
+						self.facing = CardinalDirection.NORTH
+				elif is_a_pressed:
+					self.traveling = CardinalDirection.WEST
+					if not keys_pressed[pg.K_LCTRL]:
+						self.facing = CardinalDirection.WEST
+				elif is_s_pressed:
+					self.traveling = CardinalDirection.SOUTH
+					if not keys_pressed[pg.K_LCTRL]:
+						self.facing = CardinalDirection.SOUTH
+				elif is_d_pressed:
+					self.traveling = CardinalDirection.EAST
+					if not keys_pressed[pg.K_LCTRL]:
+						self.facing = CardinalDirection.EAST
+				if world[self.traveling_to_pos()].can_walk(self) and\
+					(is_w_pressed or is_a_pressed or is_s_pressed or is_d_pressed) and not keys_pressed[pg.K_LSHIFT]:
 					self.player_state = PlayerState.WALKING
 					self.offset = 1
-				if is_w_pressed:
-					self.facing = CardinalDirection.NORTH
-				elif is_a_pressed:
-					self.facing = CardinalDirection.WEST
-				elif is_s_pressed:
-					self.facing = CardinalDirection.SOUTH
-				elif is_d_pressed:
-					self.facing = CardinalDirection.EAST
 			case PlayerState.WALKING:
 				self.offset += 1
 				if self.offset > 15:
 					self.player_state = PlayerState.IDLE
 					self.offset = 0
-					match self.facing:
+					match self.traveling:
 						case CardinalDirection.NORTH:
 							self.pos.y -= 1
 						case CardinalDirection.EAST:
@@ -103,7 +132,7 @@ class Player:
 	def get_offset_x_and_y(self) -> PixelPos:
 		x = 0
 		y = 0
-		match self.facing:
+		match self.traveling:
 			case CardinalDirection.NORTH:
 				y = -self.offset
 			case CardinalDirection.EAST:

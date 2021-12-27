@@ -34,3 +34,8 @@ class TileStack:
 			chunk_tile.render(world_renderer, pos)
 		if not self.tiles:
 			world_renderer.render_texture(texture.PitBottomTexture, pos.get_pixel_pos())
+
+	def can_walk(self, player):
+		if not self.tiles:
+			return 1
+		return self.tiles[-1].can_walk(player)
