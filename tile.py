@@ -42,3 +42,7 @@ class GravelTile(Tile):
 
 class PathTile(Tile):
 	TEXTURE = texture.PathTexture
+
+
+class FlowersTile(Tile):
+	TEXTURE = texture.FlowersTexture

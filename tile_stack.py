@@ -26,8 +26,11 @@ class TileStack:
 			self.tiles = [tile.GrassTile(), tile.TreeTile()]
 		else:
 			self.tiles = [tile.GrassTile()]
-			if pos.random(420420, 7) > 0.95:
+			foliage_map = pos.random(420420, 7)
+			if foliage_map > 0.95:
 				self.tiles.append(tile.TreeTile())
+			elif foliage_map > 0.85:
+				self.tiles.append(tile.FlowersTile())
 
 	def render(self, world_renderer: WorldRenderer, pos: TilePos):
 		for chunk_tile in self.tiles:

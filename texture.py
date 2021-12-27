@@ -68,3 +68,7 @@ class AcornTexture(Texture):
 
 class SelectTexture(Texture):
 	FILENAME = "select"
+
+
+class FlowersTexture(Texture):
+	FILENAME = "flowers"
