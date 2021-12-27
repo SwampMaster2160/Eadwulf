@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import List
+from typing import List, Optional
 
 import pygame as pg
 from pygame import Surface
@@ -20,12 +20,12 @@ class GUITextureAlign(IntEnum):
 
 
 class GUIRenderer:
-	surfaces: List[Surface]
+	surfaces: List[Optional[Surface]]
 	texture_dict: dict
 
 	def __init__(self, texture_dict: dict):
 		self.texture_dict = texture_dict
-		self.surfaces = [Surface((256, 256), pg.SRCALPHA) for x in range(9)]
+		self.surfaces = [None] * 9
 
 	def blit_onto_main_surface(self, main_surface: Surface):
 		window_size = main_surface.get_size()
@@ -46,14 +46,22 @@ class GUIRenderer:
 					case 2:
 						x_offset = window_size[0] - pixel_size * 256
 				world_blit_offset = (x_offset, y_offset)
-				main_surface.blit(
-					pg.transform.scale(
-						self.surfaces[y * 3 + x],
-						world_surface_on_screen_size
-					), world_blit_offset)
+				align = y * 3 + x
+				if self.surfaces[align]:
+					main_surface.blit(
+						pg.transform.scale(
+							self.surfaces[align],
+							world_surface_on_screen_size
+						), world_blit_offset)
+
+	def init_surface(self, align: GUITextureAlign):
+		if not self.surfaces[align]:
+			self.surfaces[align] = Surface((256, 256), pg.SRCALPHA)
 
 	def render_texture(self, texture, pos: PixelPos, align: GUITextureAlign):
+		self.init_surface(align)
 		self.surfaces[align].blit(self.texture_dict[texture], pos.to_tuple())
 
 	def render_rect(self, color, pos: PixelPos, size: PixelPos, align: GUITextureAlign):
+		self.init_surface(align)
 		self.surfaces[align].fill(color, (pos.x, pos.y, size.x, size.y))

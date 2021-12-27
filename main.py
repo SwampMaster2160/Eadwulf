@@ -10,6 +10,9 @@ from world import World
 from world_renderer import WorldRenderer
 
 
+KEYCODES = [pg.K_LEFT, pg.K_RIGHT, pg.K_UP, pg.K_DOWN, pg.K_RETURN]
+
+
 def main():
 	# Init window
 	pg.init()
@@ -58,14 +61,10 @@ def main():
 		for x in range(delta_time // 10000000):
 			keys_pressed = pg.key.get_pressed()
 			keys_pressed_this_tick = {}
-			keycodes = [pg.K_LEFT, pg.K_RIGHT, pg.K_UP, pg.K_DOWN]
-			for key in keycodes:
-				if keys_pressed[key] and not keys_pressed_last_tick[key]:
-					keys_pressed_this_tick[key] = 1
-				else:
-					keys_pressed_this_tick[key] = 0
+			for key in KEYCODES:
+				keys_pressed_this_tick[key] = keys_pressed[key] and not keys_pressed_last_tick[key]
 
-			player.tick(keys_pressed, keys_pressed_this_tick)
+			player.tick(keys_pressed, keys_pressed_this_tick, world)
 
 			keys_pressed_last_tick = keys_pressed
 		tick_time_carry = delta_time % 10000000

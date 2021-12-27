@@ -52,3 +52,19 @@ class PlayerSouthTexture(Texture):
 
 class PlayerWestTexture(Texture):
 	FILENAME = "player_west"
+
+
+class HammerTexture(Texture):
+	FILENAME = "hammer"
+
+
+class ShovelTexture(Texture):
+	FILENAME = "shovel"
+
+
+class AcornTexture(Texture):
+	FILENAME = "acorn"
+
+
+class SelectTexture(Texture):
+	FILENAME = "select"

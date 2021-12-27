@@ -1,10 +1,12 @@
 from enum import Enum, auto
-from typing import Sequence
+from typing import Sequence, List
 
 import pygame as pg
 
+import item
 import texture
 from gui_renderer import GUIRenderer, GUITextureAlign
+from item import Item
 from pixel_pos import PixelPos
 from tile_pos import TilePos
 from world_renderer import WorldRenderer
@@ -29,8 +31,13 @@ class Player:
 	facing: CardinalDirection = CardinalDirection.NORTH
 
 	selected_item: int = 0
+	inventory: List[Item] = [item.NullItem()] * 50
+
+	def __init__(self):
+		self.inventory[0] = item.ShovelItem()
+		self.inventory[1] = item.HammerItem()
 	
-	def tick(self, keys_pressed: Sequence[bool], keys_pressed_this_tick: dict):
+	def tick(self, keys_pressed: Sequence[bool], keys_pressed_this_tick: dict, world):
 		if keys_pressed_this_tick[pg.K_LEFT]:
 			self.selected_item -= 1
 			if self.selected_item % 10 == 9:
@@ -50,6 +57,19 @@ class Player:
 
 		match self.player_state:
 			case PlayerState.IDLE:
+				if keys_pressed_this_tick[pg.K_RETURN]:
+					use_pos = self.pos
+					match self.facing:
+						case CardinalDirection.NORTH:
+							use_pos += TilePos(0, -1)
+						case CardinalDirection.EAST:
+							use_pos += TilePos(1, 0)
+						case CardinalDirection.SOUTH:
+							use_pos += TilePos(0, 1)
+						case CardinalDirection.WEST:
+							use_pos += TilePos(-1, 0)
+					self.inventory[self.selected_item].use(world[use_pos])
+
 				is_w_pressed = keys_pressed[pg.K_w]
 				is_a_pressed = keys_pressed[pg.K_a]
 				is_s_pressed = keys_pressed[pg.K_s]
@@ -101,11 +121,12 @@ class Player:
 				color = (0, 0, 0, 127)
 				if x % 2 != y % 2:
 					color = (31, 31, 31, 127)
-				gui_renderer.render_rect(color, PixelPos(x * 16, y * 16), PixelPos(16, 16), GUITextureAlign.TOP_LEFT)
-		gui_renderer.render_rect(
-			(0, 0, 0, 191),
+				render_pos = PixelPos(x * 16, y * 16)
+				gui_renderer.render_rect(color, render_pos, PixelPos(16, 16), GUITextureAlign.TOP_LEFT)
+				self.inventory[item_index].render(gui_renderer, render_pos)
+		gui_renderer.render_texture(
+			texture.SelectTexture,
 			PixelPos(self.selected_item % 10 * 16, self.selected_item // 10 * 16),
-			PixelPos(16, 16),
 			GUITextureAlign.TOP_LEFT
 		)
 
