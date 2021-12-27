@@ -58,8 +58,8 @@ class Player:
 				return self.pos + TilePos(-1, 0)
 
 	def __init__(self):
-		self.inventory[0] = item.ShovelItem()
-		self.inventory[1] = item.HammerItem()
+		self.inventory[0] = item.HammerItem()
+		self.inventory[1] = item.ShovelItem()
 		self.inventory[2] = item.AcornItem()
 		self.inventory[3] = item.TileItem(tile.GrassTile())
 		self.inventory[4] = item.TileItem(tile.SandTile())
@@ -69,6 +69,7 @@ class Player:
 		self.inventory[8] = item.TileItem(tile.PathTile())
 	
 	def tick(self, keys_pressed: Sequence[bool], keys_pressed_this_tick: dict, world):
+		# Inventory
 		if keys_pressed_this_tick[pg.K_LEFT]:
 			self.selected_item -= 1
 			if self.selected_item % 10 == 9:
@@ -85,10 +86,10 @@ class Player:
 			self.selected_item = (self.selected_item - 10) % 50
 		if keys_pressed_this_tick[pg.K_DOWN]:
 			self.selected_item = (self.selected_item + 10) % 50
-
+		# Player movement
 		match self.player_state:
 			case PlayerState.IDLE:
-				if keys_pressed_this_tick[pg.K_RETURN]:
+				if keys_pressed_this_tick[pg.K_RETURN] or keys_pressed[pg.K_LALT] and keys_pressed[pg.K_RETURN]:
 					self.inventory[self.selected_item].use(world[self.looking_at_pos()])
 				is_w_pressed = keys_pressed[pg.K_w]
 				is_a_pressed = keys_pressed[pg.K_a]

@@ -14,11 +14,15 @@ class Tile:
 		return self.CAN_WALK
 
 
-class GrassTile(Tile):
+class GroundTile(Tile):
+	pass
+
+
+class GrassTile(GroundTile):
 	TEXTURE = texture.GrassTexture
 
 
-class WaterTile(Tile):
+class WaterTile(GroundTile):
 	TEXTURE = texture.WaterTexture
 	CAN_WALK = 0
 
@@ -28,19 +32,19 @@ class TreeTile(Tile):
 	CAN_WALK = 0
 
 
-class SandTile(Tile):
+class SandTile(GroundTile):
 	TEXTURE = texture.SandTexture
 
 
-class BlackSandTile(Tile):
+class BlackSandTile(GroundTile):
 	TEXTURE = texture.BlackSandTexture
 
 
-class GravelTile(Tile):
+class GravelTile(GroundTile):
 	TEXTURE = texture.GravelTexture
 
 
-class PathTile(Tile):
+class PathTile(GroundTile):
 	TEXTURE = texture.PathTexture
 
 

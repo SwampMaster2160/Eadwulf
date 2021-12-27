@@ -3,6 +3,8 @@ import time
 
 import pygame as pg
 
+import gui_menu
+from game_state import GameState
 from gui_renderer import GUIRenderer
 from player import Player
 from texture import Texture
@@ -10,7 +12,7 @@ from world import World
 from world_renderer import WorldRenderer
 
 
-KEYCODES = [pg.K_LEFT, pg.K_RIGHT, pg.K_UP, pg.K_DOWN, pg.K_RETURN]
+KEYCODES = [pg.K_LEFT, pg.K_RIGHT, pg.K_UP, pg.K_DOWN, pg.K_RETURN, pg.K_ESCAPE]
 
 
 def main():
@@ -25,6 +27,10 @@ def main():
 	last_time = time.time_ns()
 	tick_time_carry = 0
 	keys_pressed_last_tick = pg.key.get_pressed()
+	keys_pressed_last_frame = pg.key.get_pressed()
+
+	game_state = GameState.INGAME
+	current_gui_menu = None
 	
 	player = Player()
 	world = World()
@@ -58,16 +64,30 @@ def main():
 		time_ns = time.time_ns()
 		delta_time = time_ns - last_time + tick_time_carry
 		last_time = time_ns
+		keys_pressed = pg.key.get_pressed()
 		for x in range(delta_time // 10000000):
-			keys_pressed = pg.key.get_pressed()
 			keys_pressed_this_tick = {}
 			for key in KEYCODES:
 				keys_pressed_this_tick[key] = keys_pressed[key] and not keys_pressed_last_tick[key]
 
-			player.tick(keys_pressed, keys_pressed_this_tick, world)
+			if game_state == GameState.INGAME:
+				player.tick(keys_pressed, keys_pressed_this_tick, world)
 
 			keys_pressed_last_tick = keys_pressed
 		tick_time_carry = delta_time % 10000000
+
+		# Each frame (Not rendering)
+		keys_pressed_this_frame = {}
+		for key in KEYCODES:
+			keys_pressed_this_frame[key] = keys_pressed[key] and not keys_pressed_last_frame[key]
+
+		if keys_pressed_this_frame[pg.K_ESCAPE] and game_state == GameState.INGAME:
+			game_state = GameState.IN_MENU
+			current_gui_menu = gui_menu.PauseGUIMenu()
+		elif game_state == GameState.IN_MENU:
+			game_state, current_gui_menu = current_gui_menu.tick(keys_pressed, keys_pressed_this_frame)
+
+		keys_pressed_last_frame = keys_pressed
 		
 		# Render game
 		world_renderer = WorldRenderer(main_surface, texture_dict, player)
@@ -75,7 +95,11 @@ def main():
 		
 		world.render(world_renderer, player)
 		player.render(world_renderer)
-		player.render_gui(gui_renderer)
+		match game_state:
+			case GameState.INGAME:
+				player.render_gui(gui_renderer)
+			case GameState.IN_MENU:
+				current_gui_menu.render(gui_renderer)
 		
 		world_renderer.blit_onto_main_surface(main_surface, player)
 		gui_renderer.blit_onto_main_surface(main_surface)

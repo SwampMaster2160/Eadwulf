@@ -1,4 +1,4 @@
-from copy import copy
+import copy
 
 import texture
 import tile
@@ -31,6 +31,10 @@ class ToolItem(Item):
 class ShovelItem(ToolItem):
 	TEXTURE = texture.ShovelTexture
 
+	def use(self, use_on: TileStack):
+		if use_on.tiles and isinstance(use_on.tiles[-1], tile.GroundTile):
+			use_on.tiles.pop()
+
 
 class HammerItem(ToolItem):
 	TEXTURE = texture.HammerTexture
@@ -55,4 +59,4 @@ class TileItem(Item):
 
 	def use(self, use_on: TileStack):
 		if not use_on.tiles:
-			use_on.tiles.append(copy(self.child))
+			use_on.tiles.append(copy.deepcopy(self.child))
