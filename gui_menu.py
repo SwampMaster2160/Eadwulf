@@ -50,8 +50,8 @@ class GUIMenu:
 
 class PauseGUIMenu(GUIMenu):
 	ELEMENTS = [
-		gui_element.RectGUIElement(PixelPos(0, 0), PixelPos(100, 100), (127, 127, 127), GUITextureAlign.CENTRE_CENTRE),
-		gui_element.ButtonGUIElement(PixelPos(150, 20), PixelPos(100, 100), GUITextureAlign.CENTRE_CENTRE)
+		gui_element.RectGUIElement(),
+		gui_element.ButtonGUIElement(auto_place_y=0)
 	]
 
 	def esc_pressed(self):

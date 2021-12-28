@@ -1,9 +1,11 @@
+import itertools
 import os
 import time
 
 import pygame as pg
 
 import gui_menu
+from font_page import FontPage
 from game_state import GameState
 from gui_renderer import GUIRenderer
 from mouse_state import MouseState
@@ -43,6 +45,13 @@ def main():
 	for texture_class in Texture.__subclasses__():
 		texture_dict[texture_class] = pg.image.load(
 			os.path.join(main_dir, "res", "texture", texture_class.FILENAME + ".png"))
+
+	font_pages = []
+	for x in itertools.count():
+		try:
+			font_pages.append(FontPage(x))
+		except FileNotFoundError:
+			break
 	
 	# Main game loop
 	running = 1
@@ -88,7 +97,7 @@ def main():
 		tick_time_carry = delta_time % 10000000
 
 		# Each frame (Not rendering)
-		gui_renderer = GUIRenderer(texture_dict)
+		gui_renderer = GUIRenderer(texture_dict, font_pages)
 		mouse_state.calculate_surface_poses(main_surface.get_size(), gui_renderer)
 
 		keys_pressed_this_frame = {}

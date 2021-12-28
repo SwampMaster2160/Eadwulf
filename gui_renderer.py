@@ -4,6 +4,7 @@ from typing import List, Optional
 import pygame as pg
 from pygame import Surface
 
+from font_page import FontPage
 from pixel_pos import PixelPos
 
 
@@ -22,10 +23,12 @@ class GUITextureAlign(IntEnum):
 class GUIRenderer:
 	surfaces: List[Optional[Surface]]
 	texture_dict: dict
+	font_pages: List[FontPage]
 
-	def __init__(self, texture_dict: dict):
+	def __init__(self, texture_dict: dict, font_pages: List[FontPage]):
 		self.texture_dict = texture_dict
 		self.surfaces = [None] * 9
+		self.font_pages = font_pages
 
 	def blit_onto_main_surface(self, main_surface: Surface):
 		window_size = main_surface.get_size()
@@ -65,3 +68,28 @@ class GUIRenderer:
 	def render_rect(self, color, pos: PixelPos, size: PixelPos, align: GUITextureAlign):
 		self.init_surface(align)
 		self.surfaces[align].fill(color, (pos.x, pos.y, size.x, size.y))
+
+	def render_char(self, char: chr, pos: PixelPos, align: GUITextureAlign):
+		char_id = ord(char)
+		page = char_id // 256
+		char_id_in_page = char_id % 256
+		self.surfaces[align].blit(
+			self.font_pages[page].texture, pos.to_tuple(), (char_id_in_page % 16 * 8, char_id_in_page // 16 * 16, 8, 16)
+		)
+
+	def render_string(self, string: str, centered: bool, pos: PixelPos, align: GUITextureAlign):
+		width = 0
+		for char in string:
+			char_id = ord(char)
+			page = char_id // 256
+			char_id_in_page = char_id % 256
+			width += self.font_pages[page].widths[char_id_in_page]
+		offset = 0
+		if centered:
+			offset = -width // 2
+		for char in string:
+			char_id = ord(char)
+			page = char_id // 256
+			char_id_in_page = char_id % 256
+			self.render_char(char, pos + PixelPos(offset, -8), align)
+			offset += self.font_pages[page].widths[char_id_in_page] + 1

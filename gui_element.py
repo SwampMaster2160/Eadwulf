@@ -25,7 +25,13 @@ class RectGUIElement(GUIElement):
 	color: any
 	align: GUITextureAlign
 
-	def __init__(self, pos: PixelPos, size: PixelPos, color, align: GUITextureAlign):
+	def __init__(
+			self,
+			pos: PixelPos = PixelPos(64, 28),
+			size: PixelPos = PixelPos(128, 200),
+			color=(31, 31, 31),
+			align: GUITextureAlign = GUITextureAlign.CENTRE_CENTRE
+	):
 		self.pos = pos
 		self.size = size
 		self.color = color
@@ -36,12 +42,19 @@ class RectGUIElement(GUIElement):
 
 
 class ButtonGUIElement(GUIElement):
+	TEXT = "Button"
 	pos: PixelPos
 	size: PixelPos
 	align: GUITextureAlign
 
-	def __init__(self, pos: PixelPos, size: PixelPos, align: GUITextureAlign):
-		self.pos = pos
+	def __init__(
+			self,
+			pos: PixelPos = PixelPos(64, 28),
+			size: PixelPos = PixelPos(128, 16),
+			align: GUITextureAlign = GUITextureAlign.CENTRE_CENTRE,
+			auto_place_y: int = 0
+	):
+		self.pos = pos + PixelPos(0, auto_place_y * 20)
 		self.size = size
 		self.align = align
 
@@ -55,10 +68,13 @@ class ButtonGUIElement(GUIElement):
 		return GameState.INGAME, self
 
 	def render(self, gui_renderer: GUIRenderer):
-		color = (63, 63, 63)
+		color = (223, 223, 223)
 		match self.hover_state:
 			case MouseOverState.HOVER_OVER:
-				color = (63, 63, 127)
+				color = (127, 255, 127)
 			case MouseOverState.CLICKING:
-				color = (63, 63, 255)
+				color = (63, 255, 63)
 		gui_renderer.render_rect(color, self.pos, self.size, self.align)
+		gui_renderer.render_string(
+			self.TEXT, 1, self.pos + PixelPos(self.size.x // 2, self.size.y // 2), GUITextureAlign.CENTRE_CENTRE
+		)
