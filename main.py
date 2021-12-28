@@ -6,6 +6,7 @@ import pygame as pg
 import gui_menu
 from game_state import GameState
 from gui_renderer import GUIRenderer
+from mouse_state import MouseState
 from player import Player
 from texture import Texture
 from world import World
@@ -28,6 +29,7 @@ def main():
 	tick_time_carry = 0
 	keys_pressed_last_tick = pg.key.get_pressed()
 	keys_pressed_last_frame = pg.key.get_pressed()
+	mouse_state = MouseState()
 
 	game_state = GameState.INGAME
 	current_gui_menu = None
@@ -59,6 +61,15 @@ def main():
 								main_surface = pg.display.set_mode(flags=pg.FULLSCREEN, vsync=1)
 							else:
 								main_surface = pg.display.set_mode(windowed_size, pg.RESIZABLE, vsync=1)
+				case pg.MOUSEMOTION:
+					mouse_state.pos = event.pos
+				case pg.MOUSEBUTTONUP:
+					if event.button == pg.BUTTON_LEFT:
+						mouse_state.is_clicked_starting_this_frame = 1
+						mouse_state.is_clicked = 0
+				case pg.MOUSEBUTTONDOWN:
+					if event.button == pg.BUTTON_LEFT:
+						mouse_state.is_clicked = 1
 		
 		# Game ticks
 		time_ns = time.time_ns()
@@ -85,7 +96,7 @@ def main():
 			game_state = GameState.IN_MENU
 			current_gui_menu = gui_menu.PauseGUIMenu()
 		elif game_state == GameState.IN_MENU:
-			game_state, current_gui_menu = current_gui_menu.tick(keys_pressed, keys_pressed_this_frame)
+			game_state, current_gui_menu = current_gui_menu.tick(keys_pressed, keys_pressed_this_frame, mouse_state, world)
 
 		keys_pressed_last_frame = keys_pressed
 		
@@ -104,6 +115,9 @@ def main():
 		world_renderer.blit_onto_main_surface(main_surface, player)
 		gui_renderer.blit_onto_main_surface(main_surface)
 		pg.display.flip()
+
+		# End
+		mouse_state.is_clicked_starting_this_frame = 0
 
 
 if __name__ == "__main__":
