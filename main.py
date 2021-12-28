@@ -88,6 +88,9 @@ def main():
 		tick_time_carry = delta_time % 10000000
 
 		# Each frame (Not rendering)
+		gui_renderer = GUIRenderer(texture_dict)
+		mouse_state.calculate_surface_poses(main_surface.get_size(), gui_renderer)
+
 		keys_pressed_this_frame = {}
 		for key in KEYCODES:
 			keys_pressed_this_frame[key] = keys_pressed[key] and not keys_pressed_last_frame[key]
@@ -102,7 +105,6 @@ def main():
 		
 		# Render game
 		world_renderer = WorldRenderer(main_surface, texture_dict, player)
-		gui_renderer = GUIRenderer(texture_dict)
 		
 		world.render(world_renderer, player)
 		player.render(world_renderer)

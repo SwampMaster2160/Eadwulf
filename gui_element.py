@@ -46,7 +46,9 @@ class ButtonGUIElement(GUIElement):
 		self.align = align
 
 	def is_mouse_over(self, mouse: MouseState) -> bool:
-		return 100 < mouse.pos[0] < 200 and 100 < mouse.pos[1] < 200
+		mouse_pos = mouse.pos_on_gui_surfaces[self.align]
+		return self.pos.x < mouse_pos.x < self.pos.x + self.size.x and\
+			self.pos.y < mouse_pos.y < self.pos.y + self.size.y
 
 	def click(self, world: World):
 		print("Click")
