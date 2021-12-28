@@ -37,7 +37,7 @@ def main():
 	game_state = GameState.IN_MENU
 	current_gui_menu = gui_menu.MainMenuGUIMenu()
 	
-	player = Player()
+	# player = Player()
 	world = World()
 	
 	# Load all textures
@@ -92,7 +92,7 @@ def main():
 				keys_pressed_this_tick[key] = keys_pressed[key] and not keys_pressed_last_tick[key]
 
 			if game_state == GameState.INGAME:
-				player.tick(keys_pressed, keys_pressed_this_tick, world)
+				world.tick(keys_pressed, keys_pressed_this_tick)
 
 			keys_pressed_last_tick = keys_pressed
 		tick_time_carry = delta_time % 10000000
@@ -114,17 +114,16 @@ def main():
 		keys_pressed_last_frame = keys_pressed
 		
 		# Render game
-		world_renderer = WorldRenderer(main_surface, texture_dict, player)
+		world_renderer = WorldRenderer(main_surface, texture_dict, world.player)
 		
-		world.render(world_renderer, player)
-		player.render(world_renderer)
+		world.render(world_renderer)
 		match game_state:
 			case GameState.INGAME:
-				player.render_gui(gui_renderer)
+				world.player.render_gui(gui_renderer)
 			case GameState.IN_MENU:
 				current_gui_menu.render(gui_renderer)
 		
-		world_renderer.blit_onto_main_surface(main_surface, player)
+		world_renderer.blit_onto_main_surface(main_surface, world.player)
 		gui_renderer.blit_onto_main_surface(main_surface)
 		pg.display.flip()
 

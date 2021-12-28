@@ -86,6 +86,7 @@ class Player:
 			self.selected_item = (self.selected_item - 10) % 50
 		if keys_pressed_this_tick[pg.K_DOWN]:
 			self.selected_item = (self.selected_item + 10) % 50
+
 		# Player movement
 		match self.player_state:
 			case PlayerState.IDLE:
