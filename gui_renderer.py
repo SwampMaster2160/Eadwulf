@@ -77,7 +77,7 @@ class GUIRenderer:
 			self.font_pages[page].texture, pos.to_tuple(), (char_id_in_page % 16 * 8, char_id_in_page // 16 * 16, 8, 16)
 		)
 
-	def render_string(self, string: str, centered: bool, pos: PixelPos, align: GUITextureAlign):
+	def render_string(self, string: str, centered: bool, pos: PixelPos, align: GUITextureAlign) -> int:
 		width = 0
 		for char in string:
 			char_id = ord(char)
@@ -93,3 +93,4 @@ class GUIRenderer:
 			char_id_in_page = char_id % 256
 			self.render_char(char, pos + PixelPos(offset, -8), align)
 			offset += self.font_pages[page].widths[char_id_in_page] + 1
+		return width

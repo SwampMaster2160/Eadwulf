@@ -8,6 +8,7 @@ import texture
 import tile
 from gui_renderer import GUIRenderer, GUITextureAlign
 from item import Item
+from keyboard import Keyboard
 from pixel_pos import PixelPos
 from tile_pos import TilePos
 from world_renderer import WorldRenderer
@@ -68,52 +69,52 @@ class Player:
 		self.inventory[7] = item.TileItem(tile.WaterTile())
 		self.inventory[8] = item.TileItem(tile.PathTile())
 	
-	def tick(self, keys_pressed: Sequence[bool], keys_pressed_this_tick: dict, world):
+	def tick(self, keyboard: Keyboard, world):
 		# Inventory
-		if keys_pressed_this_tick[pg.K_LEFT]:
+		if keyboard.keys_pressed_starting_now[pg.K_LEFT]:
 			self.selected_item -= 1
 			if self.selected_item % 10 == 9:
 				self.selected_item += 10
 			if self.selected_item > 49:
 				self.selected_item = 9
-		if keys_pressed_this_tick[pg.K_RIGHT]:
+		if keyboard.keys_pressed_starting_now[pg.K_RIGHT]:
 			self.selected_item += 1
 			if self.selected_item % 10 == 0:
 				self.selected_item -= 10
 			if self.selected_item > 49:
 				self.selected_item = 39
-		if keys_pressed_this_tick[pg.K_UP]:
+		if keyboard.keys_pressed_starting_now[pg.K_UP]:
 			self.selected_item = (self.selected_item - 10) % 50
-		if keys_pressed_this_tick[pg.K_DOWN]:
+		if keyboard.keys_pressed_starting_now[pg.K_DOWN]:
 			self.selected_item = (self.selected_item + 10) % 50
 
 		# Player movement
 		match self.player_state:
 			case PlayerState.IDLE:
-				if keys_pressed_this_tick[pg.K_RETURN] or keys_pressed[pg.K_LALT] and keys_pressed[pg.K_RETURN]:
+				if keyboard.keys_pressed_starting_now[pg.K_RETURN] or keyboard.keys_pressed[pg.K_LALT] and keyboard.keys_pressed[pg.K_RETURN]:
 					self.inventory[self.selected_item].use(world[self.looking_at_pos()])
-				is_w_pressed = keys_pressed[pg.K_w]
-				is_a_pressed = keys_pressed[pg.K_a]
-				is_s_pressed = keys_pressed[pg.K_s]
-				is_d_pressed = keys_pressed[pg.K_d]
+				is_w_pressed = keyboard.keys_pressed[pg.K_w]
+				is_a_pressed = keyboard.keys_pressed[pg.K_a]
+				is_s_pressed = keyboard.keys_pressed[pg.K_s]
+				is_d_pressed = keyboard.keys_pressed[pg.K_d]
 				if is_w_pressed:
 					self.traveling = CardinalDirection.NORTH
-					if not keys_pressed[pg.K_LCTRL]:
+					if not keyboard.keys_pressed[pg.K_LCTRL]:
 						self.facing = CardinalDirection.NORTH
 				elif is_a_pressed:
 					self.traveling = CardinalDirection.WEST
-					if not keys_pressed[pg.K_LCTRL]:
+					if not keyboard.keys_pressed[pg.K_LCTRL]:
 						self.facing = CardinalDirection.WEST
 				elif is_s_pressed:
 					self.traveling = CardinalDirection.SOUTH
-					if not keys_pressed[pg.K_LCTRL]:
+					if not keyboard.keys_pressed[pg.K_LCTRL]:
 						self.facing = CardinalDirection.SOUTH
 				elif is_d_pressed:
 					self.traveling = CardinalDirection.EAST
-					if not keys_pressed[pg.K_LCTRL]:
+					if not keyboard.keys_pressed[pg.K_LCTRL]:
 						self.facing = CardinalDirection.EAST
 				if world[self.traveling_to_pos()].can_walk(self) and\
-					(is_w_pressed or is_a_pressed or is_s_pressed or is_d_pressed) and not keys_pressed[pg.K_LSHIFT]:
+					(is_w_pressed or is_a_pressed or is_s_pressed or is_d_pressed) and not keyboard.keys_pressed[pg.K_LSHIFT]:
 					self.player_state = PlayerState.WALKING
 					self.offset = 1
 			case PlayerState.WALKING:

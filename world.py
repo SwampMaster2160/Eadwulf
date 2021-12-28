@@ -1,6 +1,5 @@
-from typing import Sequence
-
 from chunk import Chunk
+from keyboard import Keyboard
 from player import Player
 from tile_pos import TilePos
 from tile_stack import TileStack
@@ -8,11 +7,13 @@ from world_renderer import WorldRenderer
 
 
 class World:
+	name: str = ""
+	filepath: str = ""
 	player: Player = Player()
 	chunks: dict = {}
 
-	def tick(self, keys_pressed: Sequence[bool], keys_pressed_this_tick: dict):
-		self.player.tick(keys_pressed, keys_pressed_this_tick, self)
+	def tick(self, keyboard: Keyboard):
+		self.player.tick(keyboard, self)
 
 	def render(self, world_renderer: WorldRenderer):
 		for y in range(self.player.pos.y - 9, self.player.pos.y + 10):

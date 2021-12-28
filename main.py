@@ -9,8 +9,8 @@ import gui_menu
 from font_page import FontPage
 from game_state import GameState
 from gui_renderer import GUIRenderer
+from keyboard import Keyboard
 from mouse_state import MouseState
-from player import Player
 from texture import Texture
 from world import World
 from world_renderer import WorldRenderer
@@ -36,8 +36,7 @@ def main():
 
 	game_state = GameState.IN_MENU
 	current_gui_menu = gui_menu.MainMenuGUIMenu()
-	
-	# player = Player()
+
 	world = World()
 	
 	# Load all textures
@@ -57,11 +56,14 @@ def main():
 	# Main game loop
 	running = 1
 	while running:
+		new_text = ""
 		# Poll window events
 		for event in pg.event.get():
 			match event.type:
 				case pg.QUIT:
 					running = 0
+				case pg.KEYDOWN:
+					new_text += event.unicode
 				case pg.KEYUP:
 					match event.key:
 						case pg.K_F11:
@@ -92,7 +94,7 @@ def main():
 				keys_pressed_this_tick[key] = keys_pressed[key] and not keys_pressed_last_tick[key]
 
 			if game_state == GameState.INGAME:
-				world.tick(keys_pressed, keys_pressed_this_tick)
+				world.tick(Keyboard(keys_pressed, keys_pressed_this_tick, new_text))
 
 			keys_pressed_last_tick = keys_pressed
 		tick_time_carry = delta_time % 10000000
@@ -109,7 +111,7 @@ def main():
 			game_state = GameState.IN_MENU
 			current_gui_menu = gui_menu.PauseGUIMenu()
 		elif game_state == GameState.IN_MENU:
-			game_state, current_gui_menu = current_gui_menu.tick(keys_pressed, keys_pressed_this_frame, mouse_state, world)
+			game_state, current_gui_menu = current_gui_menu.tick(Keyboard(keys_pressed, keys_pressed_this_frame, new_text), mouse_state, world)
 
 		keys_pressed_last_frame = keys_pressed
 		

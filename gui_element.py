@@ -1,6 +1,7 @@
 import gui_menu
 from game_state import GameState
 from gui_renderer import GUIRenderer, GUITextureAlign
+from keyboard import Keyboard
 from mouse_over_state import MouseOverState
 from mouse_state import MouseState
 from pixel_pos import PixelPos
@@ -10,8 +11,14 @@ from world import World
 class GUIElement:
 	hover_state: MouseOverState = MouseOverState.NOT_OVER
 
-	def click(self, world: World):
+	def tick(self, keyboard: Keyboard):
+		pass
+
+	def click(self, world: World, parent_gui_menu):
 		return None
+
+	def click_off(self):
+		pass
 
 	def is_mouse_over(self, mouse: MouseState) -> bool:
 		return 0
@@ -44,6 +51,7 @@ class RectGUIElement(GUIElement):
 
 class ButtonGUIElement(GUIElement):
 	TEXT = "Button"
+	ENABLED = 1
 	pos: PixelPos
 	size: PixelPos
 	align: GUITextureAlign
@@ -64,8 +72,7 @@ class ButtonGUIElement(GUIElement):
 		return self.pos.x < mouse_pos.x < self.pos.x + self.size.x and\
 			self.pos.y < mouse_pos.y < self.pos.y + self.size.y
 
-	def click(self, world: World):
-		print("Click")
+	def click(self, world: World, parent_gui_menu):
 		return None
 
 	def render(self, gui_renderer: GUIRenderer):
@@ -75,6 +82,8 @@ class ButtonGUIElement(GUIElement):
 				color = (127, 255, 127)
 			case MouseOverState.CLICKING:
 				color = (63, 255, 63)
+		if not self.ENABLED:
+			color = (63, 63, 63)
 		gui_renderer.render_rect(color, self.pos, self.size, self.align)
 		gui_renderer.render_string(
 			self.TEXT, 1, self.pos + PixelPos(self.size.x // 2, self.size.y // 2), GUITextureAlign.CENTRE_CENTRE
@@ -84,35 +93,43 @@ class ButtonGUIElement(GUIElement):
 class ResumeButton(ButtonGUIElement):
 	TEXT = "Resume"
 
-	def click(self, world: World):
+	def click(self, world: World, parent_gui_menu):
 		return GameState.INGAME, self
 
 
 class ExitGameButton(ButtonGUIElement):
 	TEXT = "Exit Game"
 
-	def click(self, world: World):
+	def click(self, world: World, parent_gui_menu):
 		return GameState.EXITING, self
 
 
 class ExitToMainMenuButton(ButtonGUIElement):
 	TEXT = "Exit to Main Menu"
 
-	def click(self, world: World):
+	def click(self, world: World, parent_gui_menu):
 		return GameState.IN_MENU, gui_menu.MainMenuGUIMenu()
 
 
 class NewWorldButton(ButtonGUIElement):
 	TEXT = "Create New World"
 
-	def click(self, world: World):
+	def click(self, world: World, parent_gui_menu):
 		return GameState.IN_MENU, gui_menu.NewWorldGUIMenu()
+
+
+class LoadWorldGUIButton(ButtonGUIElement):
+	TEXT = "Load World"
+	ENABLED = 0
 
 
 class NewWorldFinalizeButton(ButtonGUIElement):
 	TEXT = "Create New World"
 
-	def click(self, world: World):
+	def click(self, world: World, parent_gui_menu):
+		text = parent_gui_menu.instance_elements[1].text_entered
+		world.name = text
+		world.filepath = text
 		world.chunks = {}
 		return GameState.INGAME, self
 
@@ -120,5 +137,79 @@ class NewWorldFinalizeButton(ButtonGUIElement):
 class BackToMainMenuButton(ButtonGUIElement):
 	TEXT = "Back"
 
-	def click(self, world: World):
+	def click(self, world: World, parent_gui_menu):
 		return GameState.IN_MENU, gui_menu.MainMenuGUIMenu()
+
+
+class TextGUIElement(GUIElement):
+	pos: PixelPos
+	text: str
+	align: GUITextureAlign
+	centred: bool
+
+	def __init__(
+			self,
+			text: str,
+			pos: PixelPos = PixelPos(128, 22),
+			align: GUITextureAlign = GUITextureAlign.CENTRE_CENTRE,
+			centred: bool = 1
+	):
+		self.text = text
+		self.pos = pos
+		self.align = align
+		self.centred = centred
+
+	def render(self, gui_renderer: GUIRenderer):
+		gui_renderer.render_string(self.text, self.centred, self.pos, self.align)
+
+
+class TextEntryGUIElement(GUIElement):
+	pos: PixelPos
+	size: PixelPos
+	align: GUITextureAlign
+	info_text: str
+	text_entered: str = ""
+	selected = 0
+
+	def __init__(
+			self,
+			info_text: str,
+			pos: PixelPos = PixelPos(64, 30),
+			size: PixelPos = PixelPos(128, 16),
+			align: GUITextureAlign = GUITextureAlign.CENTRE_CENTRE,
+			auto_place_y: int = 0
+	):
+		self.pos = pos + PixelPos(0, auto_place_y * 20)
+		self.size = size
+		self.align = align
+		self.info_text = info_text
+
+	def is_mouse_over(self, mouse: MouseState) -> bool:
+		mouse_pos = mouse.pos_on_gui_surfaces[self.align]
+		return self.pos.x < mouse_pos.x < self.pos.x + self.size.x and\
+			self.pos.y < mouse_pos.y < self.pos.y + self.size.y
+
+	def click(self, world: World, parent_gui_menu):
+		self.selected = 1
+
+	def click_off(self):
+		self.selected = 0
+
+	def render(self, gui_renderer: GUIRenderer):
+		gui_renderer.render_rect((223, 223, 223), self.pos, self.size, self.align)
+		width = gui_renderer.render_string(self.info_text, 0, self.pos + PixelPos(1, self.size.y // 2), self.align) + 1
+		color = (255, 255, 255)
+		if self.selected:
+			color = (63, 255, 63)
+		elif self.hover_state == MouseOverState.HOVER_OVER:
+			color = (127, 255, 127)
+		gui_renderer.render_rect(color, self.pos + PixelPos(width, 0), self.size + PixelPos(-width, 0), self.align)
+		gui_renderer.render_string(self.text_entered, 0, self.pos + PixelPos(width + 1, self.size.y // 2), self.align)
+
+	def tick(self, keyboard: Keyboard):
+		if self.selected:
+			for char in keyboard.new_text:
+				if self.text_entered and ord(char) == 8:
+					self.text_entered = self.text_entered[:-1]
+				else:
+					self.text_entered += char
