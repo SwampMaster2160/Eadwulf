@@ -83,10 +83,10 @@ class GUIRenderer:
 			char_id = ord(char)
 			page = char_id // 256
 			char_id_in_page = char_id % 256
-			width += self.font_pages[page].widths[char_id_in_page]
+			width += self.font_pages[page].widths[char_id_in_page] + 1
 		offset = 0
 		if centered:
-			offset = -width // 2
+			offset = -(width - 1) // 2
 		for char in string:
 			char_id = ord(char)
 			page = char_id // 256

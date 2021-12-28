@@ -3,6 +3,7 @@ import os
 import time
 
 import pygame as pg
+from pygame.event import Event
 
 import gui_menu
 from font_page import FontPage
@@ -33,8 +34,8 @@ def main():
 	keys_pressed_last_frame = pg.key.get_pressed()
 	mouse_state = MouseState()
 
-	game_state = GameState.INGAME
-	current_gui_menu = None
+	game_state = GameState.IN_MENU
+	current_gui_menu = gui_menu.MainMenuGUIMenu()
 	
 	player = Player()
 	world = World()
@@ -129,6 +130,9 @@ def main():
 
 		# End
 		mouse_state.is_clicked_starting_this_frame = 0
+
+		if game_state == GameState.EXITING:
+			pg.event.post(Event(pg.QUIT))
 
 
 if __name__ == "__main__":

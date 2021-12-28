@@ -51,8 +51,26 @@ class GUIMenu:
 class PauseGUIMenu(GUIMenu):
 	ELEMENTS = [
 		gui_element.RectGUIElement(),
-		gui_element.ButtonGUIElement(auto_place_y=0)
+		gui_element.ResumeButton(auto_place_y=0),
+		gui_element.ExitToMainMenuButton(auto_place_y=8),
+		gui_element.ExitGameButton(auto_place_y=9)
 	]
 
 	def esc_pressed(self):
 		return GameState.INGAME, self
+
+
+class MainMenuGUIMenu(GUIMenu):
+	ELEMENTS = [
+		gui_element.RectGUIElement(),
+		gui_element.NewWorldButton(auto_place_y=0),
+		gui_element.ExitGameButton(auto_place_y=9)
+	]
+
+
+class NewWorldGUIMenu(GUIMenu):
+	ELEMENTS = [
+		gui_element.RectGUIElement(),
+		gui_element.NewWorldFinalizeButton(auto_place_y=8),
+		gui_element.BackToMainMenuButton(auto_place_y=9)
+	]

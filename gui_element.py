@@ -1,3 +1,4 @@
+import gui_menu
 from game_state import GameState
 from gui_renderer import GUIRenderer, GUITextureAlign
 from mouse_over_state import MouseOverState
@@ -27,8 +28,8 @@ class RectGUIElement(GUIElement):
 
 	def __init__(
 			self,
-			pos: PixelPos = PixelPos(64, 28),
-			size: PixelPos = PixelPos(128, 200),
+			pos: PixelPos = PixelPos(64, 30),
+			size: PixelPos = PixelPos(128, 196),
 			color=(31, 31, 31),
 			align: GUITextureAlign = GUITextureAlign.CENTRE_CENTRE
 	):
@@ -49,7 +50,7 @@ class ButtonGUIElement(GUIElement):
 
 	def __init__(
 			self,
-			pos: PixelPos = PixelPos(64, 28),
+			pos: PixelPos = PixelPos(64, 30),
 			size: PixelPos = PixelPos(128, 16),
 			align: GUITextureAlign = GUITextureAlign.CENTRE_CENTRE,
 			auto_place_y: int = 0
@@ -65,7 +66,7 @@ class ButtonGUIElement(GUIElement):
 
 	def click(self, world: World):
 		print("Click")
-		return GameState.INGAME, self
+		return None
 
 	def render(self, gui_renderer: GUIRenderer):
 		color = (223, 223, 223)
@@ -78,3 +79,46 @@ class ButtonGUIElement(GUIElement):
 		gui_renderer.render_string(
 			self.TEXT, 1, self.pos + PixelPos(self.size.x // 2, self.size.y // 2), GUITextureAlign.CENTRE_CENTRE
 		)
+
+
+class ResumeButton(ButtonGUIElement):
+	TEXT = "Resume"
+
+	def click(self, world: World):
+		return GameState.INGAME, self
+
+
+class ExitGameButton(ButtonGUIElement):
+	TEXT = "Exit Game"
+
+	def click(self, world: World):
+		return GameState.EXITING, self
+
+
+class ExitToMainMenuButton(ButtonGUIElement):
+	TEXT = "Exit to Main Menu"
+
+	def click(self, world: World):
+		return GameState.IN_MENU, gui_menu.MainMenuGUIMenu()
+
+
+class NewWorldButton(ButtonGUIElement):
+	TEXT = "Create New World"
+
+	def click(self, world: World):
+		return GameState.IN_MENU, gui_menu.NewWorldGUIMenu()
+
+
+class NewWorldFinalizeButton(ButtonGUIElement):
+	TEXT = "Create New World"
+
+	def click(self, world: World):
+		world.chunks = {}
+		return GameState.INGAME, self
+
+
+class BackToMainMenuButton(ButtonGUIElement):
+	TEXT = "Back"
+
+	def click(self, world: World):
+		return GameState.IN_MENU, gui_menu.MainMenuGUIMenu()
