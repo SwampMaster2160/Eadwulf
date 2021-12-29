@@ -1,5 +1,6 @@
 import copy
 import os
+import pathlib
 from typing import List, Tuple
 
 import pygame as pg
@@ -90,8 +91,7 @@ class NewWorldGUIMenu(GUIMenu):
 class LoadWorldGUIMenu(GUIMenu):
 	def __init__(self, world: World):
 		super().__init__(world)
-		main_dir = os.path.split(os.path.abspath(__file__))[0]
-		for x, directory in enumerate(os.listdir(os.path.join(main_dir, "playerdata", "world"))):
+		for x, directory in enumerate(os.listdir(os.path.join(pathlib.Path.home(), "eadwulf", "world"))):
 			self.instance_elements.append(gui_element.LoadWorldFinalizeGUIButton(directory, auto_place_y=x + 1))
 
 	ELEMENTS = [

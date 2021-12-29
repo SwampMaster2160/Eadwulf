@@ -169,13 +169,9 @@ class NewWorldFinalizeButton(ButtonGUIElement):
 	TEXT = "Create New World"
 
 	def click(self, world: World, parent_gui_menu):
-		text = parent_gui_menu.instance_elements[1].text_entered
-		world.name = text
-		world.filepath = text
-		world.chunks = {}
-		world.do_save_world = 1
-		world.player = Player()
-		return GameState.INGAME, self
+		if world.new(parent_gui_menu.instance_elements[1].text_entered):
+			return GameState.INGAME, self
+		return None
 
 
 class BackToMainMenuButton(ButtonGUIElement):

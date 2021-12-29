@@ -1,5 +1,6 @@
 import itertools
 import os
+import pathlib
 import time
 
 import pygame as pg
@@ -33,6 +34,8 @@ def main():
 	keys_pressed_last_tick = pg.key.get_pressed()
 	keys_pressed_last_frame = pg.key.get_pressed()
 	mouse_state = MouseState()
+
+	# print(pathlib.Path.home())
 
 	world = World()
 	game_state = GameState.IN_MENU
