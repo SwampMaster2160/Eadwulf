@@ -1,5 +1,6 @@
 import copy
-from typing import List, Tuple, Sequence
+import os
+from typing import List, Tuple
 
 import pygame as pg
 
@@ -17,7 +18,7 @@ class GUIMenu:
 	ELEMENTS: List[GUIElement] = []
 	instance_elements: List[GUIElement]
 
-	def __init__(self):
+	def __init__(self, world: World):
 		self.instance_elements = copy.deepcopy(self.ELEMENTS)
 
 	def esc_pressed(self):
@@ -83,4 +84,18 @@ class NewWorldGUIMenu(GUIMenu):
 		gui_element.TextGUIElement("Create New World?"),
 		gui_element.NewWorldFinalizeButton(auto_place_y=8),
 		gui_element.BackToMainMenuButton(auto_place_y=9)
+	]
+
+
+class LoadWorldGUIMenu(GUIMenu):
+	def __init__(self, world: World):
+		super().__init__(world)
+		main_dir = os.path.split(os.path.abspath(__file__))[0]
+		for x, directory in enumerate(os.listdir(os.path.join(main_dir, "playerdata", "world"))):
+			self.instance_elements.append(gui_element.LoadWorldFinalizeGUIButton(directory, auto_place_y=x + 1))
+
+	ELEMENTS = [
+		gui_element.RectGUIElement(),
+		gui_element.TextGUIElement("Load World?"),
+		gui_element.BackToMainMenuButton(auto_place_y=0)
 	]

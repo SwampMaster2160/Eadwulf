@@ -1,6 +1,7 @@
 import os
 import pickle
 
+import world
 from chunk import Chunk
 from keyboard import Keyboard
 from player import Player
@@ -34,14 +35,27 @@ class World:
 			return self.chunks[chunk_pos][item.get_chunk_offset()]
 		return self.chunks[chunk_pos][item.get_chunk_offset()]
 
+	def load(self, path: str):
+		self.filepath = path
+		self.chunks = {}
+		self.player = Player()
+		self.do_save_world = 1
+		main_dir = os.path.split(os.path.abspath(__file__))[0]
+		world_path = os.path.join(main_dir, "playerdata", "world", path, "chunks")
+		for chunk_name in os.listdir(os.path.join(world_path)):
+			chunk_path = os.path.join(world_path, chunk_name)
+			file = open(chunk_path, "rb")
+			poses = chunk_name.split("_")
+			pos = (int(poses[0]), int(poses[1].split(".")[0]))
+			self.chunks[pos] = pickle.load(file)
+			file.close()
+
 	def save(self):
 		main_dir = os.path.split(os.path.abspath(__file__))[0]
 		world_path = os.path.join(main_dir, "playerdata", "world", self.filepath, "chunks")
 		os.makedirs(world_path, exist_ok=1)
 		for pos, chunk in self.chunks.items():
-			print(pos)
 			filename = f"{pos[0]}_{pos[1]}.ech"
 			file = open(os.path.join(world_path, filename), "wb")
 			pickle.dump(chunk, file)
 			file.close()
-		print(world_path)

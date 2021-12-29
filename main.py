@@ -34,10 +34,9 @@ def main():
 	keys_pressed_last_frame = pg.key.get_pressed()
 	mouse_state = MouseState()
 
-	game_state = GameState.IN_MENU
-	current_gui_menu = gui_menu.MainMenuGUIMenu()
-
 	world = World()
+	game_state = GameState.IN_MENU
+	current_gui_menu = gui_menu.MainMenuGUIMenu(world)
 	
 	# Load all textures
 	main_dir = os.path.split(os.path.abspath(__file__))[0]
@@ -112,7 +111,7 @@ def main():
 
 		if keys_pressed_this_frame[pg.K_ESCAPE] and game_state == GameState.INGAME:
 			game_state = GameState.IN_MENU
-			current_gui_menu = gui_menu.PauseGUIMenu()
+			current_gui_menu = gui_menu.PauseGUIMenu(world)
 		elif game_state == GameState.IN_MENU:
 			game_state, current_gui_menu = current_gui_menu.tick(Keyboard(keys_pressed, keys_pressed_this_frame, new_text), mouse_state, world)
 

@@ -115,19 +115,54 @@ class ExitToMainMenuButton(ButtonGUIElement):
 		if world.do_save_world:
 			world.save()
 		world.do_save_world = 0
-		return GameState.IN_MENU, gui_menu.MainMenuGUIMenu()
+		return GameState.IN_MENU, gui_menu.MainMenuGUIMenu(world)
 
 
 class NewWorldButton(ButtonGUIElement):
 	TEXT = "Create New World"
 
 	def click(self, world: World, parent_gui_menu):
-		return GameState.IN_MENU, gui_menu.NewWorldGUIMenu()
+		return GameState.IN_MENU, gui_menu.NewWorldGUIMenu(world)
 
 
 class LoadWorldGUIButton(ButtonGUIElement):
 	TEXT = "Load World"
-	ENABLED = 0
+
+	def click(self, world: World, parent_gui_menu):
+		return GameState.IN_MENU, gui_menu.LoadWorldGUIMenu(world)
+
+
+class LoadWorldFinalizeGUIButton(ButtonGUIElement):
+	world_name: str = ""
+
+	def __init__(
+			self,
+			world_name: str,
+			pos: PixelPos = PixelPos(64, 30),
+			size: PixelPos = PixelPos(128, 16),
+			align: GUITextureAlign = GUITextureAlign.CENTRE_CENTRE,
+			auto_place_y: int = 0
+	):
+		super().__init__(pos, size, align, auto_place_y)
+		self.world_name = world_name
+
+	def click(self, world: World, parent_gui_menu):
+		world.load(self.world_name)
+		return GameState.INGAME, self
+
+	def render(self, gui_renderer: GUIRenderer):
+		color = (223, 223, 223)
+		match self.hover_state:
+			case MouseOverState.HOVER_OVER:
+				color = (127, 255, 127)
+			case MouseOverState.CLICKING:
+				color = (63, 255, 63)
+		if not self.ENABLED:
+			color = (63, 63, 63)
+		gui_renderer.render_rect(color, self.pos, self.size, self.align)
+		gui_renderer.render_string(
+			self.world_name, 1, self.pos + PixelPos(self.size.x // 2, self.size.y // 2), GUITextureAlign.CENTRE_CENTRE
+		)
 
 
 class NewWorldFinalizeButton(ButtonGUIElement):
@@ -147,7 +182,7 @@ class BackToMainMenuButton(ButtonGUIElement):
 	TEXT = "Back"
 
 	def click(self, world: World, parent_gui_menu):
-		return GameState.IN_MENU, gui_menu.MainMenuGUIMenu()
+		return GameState.IN_MENU, gui_menu.MainMenuGUIMenu(world)
 
 
 class TextGUIElement(GUIElement):
