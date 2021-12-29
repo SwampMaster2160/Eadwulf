@@ -5,6 +5,7 @@ from keyboard import Keyboard
 from mouse_over_state import MouseOverState
 from mouse_state import MouseState
 from pixel_pos import PixelPos
+from player import Player
 from world import World
 
 
@@ -101,6 +102,9 @@ class ExitGameButton(ButtonGUIElement):
 	TEXT = "Exit Game"
 
 	def click(self, world: World, parent_gui_menu):
+		if world.do_save_world:
+			world.save()
+		world.do_save_world = 0
 		return GameState.EXITING, self
 
 
@@ -108,6 +112,9 @@ class ExitToMainMenuButton(ButtonGUIElement):
 	TEXT = "Exit to Main Menu"
 
 	def click(self, world: World, parent_gui_menu):
+		if world.do_save_world:
+			world.save()
+		world.do_save_world = 0
 		return GameState.IN_MENU, gui_menu.MainMenuGUIMenu()
 
 
@@ -131,6 +138,8 @@ class NewWorldFinalizeButton(ButtonGUIElement):
 		world.name = text
 		world.filepath = text
 		world.chunks = {}
+		world.do_save_world = 1
+		world.player = Player()
 		return GameState.INGAME, self
 
 

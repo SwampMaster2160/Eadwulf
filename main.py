@@ -61,6 +61,9 @@ def main():
 		for event in pg.event.get():
 			match event.type:
 				case pg.QUIT:
+					if world.do_save_world:
+						world.save()
+					world.do_save_world = 0
 					running = 0
 				case pg.KEYDOWN:
 					new_text += event.unicode

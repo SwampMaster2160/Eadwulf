@@ -1,3 +1,6 @@
+import os
+import pickle
+
 from chunk import Chunk
 from keyboard import Keyboard
 from player import Player
@@ -11,6 +14,7 @@ class World:
 	filepath: str = ""
 	player: Player = Player()
 	chunks: dict = {}
+	do_save_world: bool = 0
 
 	def tick(self, keyboard: Keyboard):
 		self.player.tick(keyboard, self)
@@ -29,3 +33,15 @@ class World:
 			self.chunks[chunk_pos] = Chunk(item.get_chunk_pos())
 			return self.chunks[chunk_pos][item.get_chunk_offset()]
 		return self.chunks[chunk_pos][item.get_chunk_offset()]
+
+	def save(self):
+		main_dir = os.path.split(os.path.abspath(__file__))[0]
+		world_path = os.path.join(main_dir, "playerdata", "world", self.filepath, "chunks")
+		os.makedirs(world_path, exist_ok=1)
+		for pos, chunk in self.chunks.items():
+			print(pos)
+			filename = f"{pos[0]}_{pos[1]}.ech"
+			file = open(os.path.join(world_path, filename), "wb")
+			pickle.dump(chunk, file)
+			file.close()
+		print(world_path)

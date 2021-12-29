@@ -59,6 +59,8 @@ class Player:
 				return self.pos + TilePos(-1, 0)
 
 	def __init__(self):
+		self.pos = TilePos(0, 0)
+
 		self.inventory[0] = item.HammerItem()
 		self.inventory[1] = item.ShovelItem()
 		self.inventory[2] = item.AcornItem()
