@@ -5,7 +5,6 @@ from keyboard import Keyboard
 from mouse_over_state import MouseOverState
 from mouse_state import MouseState
 from pixel_pos import PixelPos
-from player import Player
 from world import World
 
 
@@ -161,7 +160,10 @@ class LoadWorldFinalizeGUIButton(ButtonGUIElement):
 			color = (63, 63, 63)
 		gui_renderer.render_rect(color, self.pos, self.size, self.align)
 		gui_renderer.render_string(
-			self.world_name, 1, self.pos + PixelPos(self.size.x // 2, self.size.y // 2), GUITextureAlign.CENTRE_CENTRE
+			self.world_name,
+			1,
+			self.pos + PixelPos(self.size.x // 2, self.size.y // 2),
+			GUITextureAlign.CENTRE_CENTRE
 		)
 
 
@@ -237,14 +239,20 @@ class TextEntryGUIElement(GUIElement):
 
 	def render(self, gui_renderer: GUIRenderer):
 		gui_renderer.render_rect((223, 223, 223), self.pos, self.size, self.align)
-		width = gui_renderer.render_string(self.info_text, 0, self.pos + PixelPos(1, self.size.y // 2), self.align) + 1
+		width = gui_renderer.render_string(
+			self.info_text, 0, self.pos + PixelPos(1, self.size.y // 2), self.align
+		) + 1
 		color = (255, 255, 255)
 		if self.selected:
 			color = (63, 255, 63)
 		elif self.hover_state == MouseOverState.HOVER_OVER:
 			color = (127, 255, 127)
-		gui_renderer.render_rect(color, self.pos + PixelPos(width, 0), self.size + PixelPos(-width, 0), self.align)
-		gui_renderer.render_string(self.text_entered, 0, self.pos + PixelPos(width + 1, self.size.y // 2), self.align)
+		gui_renderer.render_rect(
+			color, self.pos + PixelPos(width, 0), self.size + PixelPos(-width, 0), self.align
+		)
+		gui_renderer.render_string(
+			self.text_entered, 0, self.pos + PixelPos(width + 1, self.size.y // 2), self.align
+		)
 
 	def tick(self, keyboard: Keyboard):
 		if self.selected:

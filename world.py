@@ -2,7 +2,7 @@ import os
 import pathlib
 import pickle
 
-from chunk import Chunk
+from chunk import Chunk, ChunkGeneratorThread
 from keyboard import Keyboard
 from player import Player
 from tile_pos import TilePos
@@ -15,12 +15,24 @@ class World:
 	filepath: str = ""
 	player: Player = Player()
 	chunks: dict = {}
+	generating_chunks = {}
 	do_save_world: bool = 0
 
+	def start_using_generated_chunks(self):
+		to_remove = []
+		for pos, generating_chunk in self.generating_chunks.items():
+			if not generating_chunk.is_alive():
+				self.chunks[pos] = generating_chunk.chunk
+				to_remove.append(pos)
+		for chunk_pos in to_remove:
+			del self.generating_chunks[chunk_pos]
+
 	def tick(self, keyboard: Keyboard):
+		self.start_using_generated_chunks()
 		self.player.tick(keyboard, self)
 
 	def render(self, world_renderer: WorldRenderer):
+		self.start_using_generated_chunks()
 		for y in range(self.player.pos.y - 9, self.player.pos.y + 10):
 			offset = -(world_renderer.world_surface_width_in_tiles // 2) + self.player.pos.x
 			for x in range(offset, world_renderer.world_surface_width_in_tiles + offset):
@@ -31,8 +43,14 @@ class World:
 	def __getitem__(self, item: TilePos) -> TileStack:
 		chunk_pos = item.get_chunk_pos().get_tuple()
 		if chunk_pos not in self.chunks:
-			self.chunks[chunk_pos] = Chunk(item.get_chunk_pos())
-			return self.chunks[chunk_pos][item.get_chunk_offset()]
+			self.generating_chunks[chunk_pos] = ChunkGeneratorThread(item.get_chunk_pos())
+			self.generating_chunks[chunk_pos].start()
+			self.chunks[chunk_pos] = None
+			return TileStack(None)
+			# self.chunks[chunk_pos] = Chunk(item.get_chunk_pos())
+			# return self.chunks[chunk_pos][item.get_chunk_offset()]
+		elif self.chunks[chunk_pos] is None:
+			return TileStack(None)
 		return self.chunks[chunk_pos][item.get_chunk_offset()]
 
 	def new(self, filename: str):
@@ -48,6 +66,7 @@ class World:
 		self.name = filename
 		self.filepath = filename
 		self.chunks = {}
+		self.generating_chunks = {}
 		self.do_save_world = 1
 		self.player = Player()
 		return 1
@@ -55,6 +74,7 @@ class World:
 	def load(self, path: str):
 		self.filepath = path
 		self.chunks = {}
+		self.generating_chunks = {}
 		self.player = Player()
 		self.do_save_world = 1
 		world_path = os.path.join(pathlib.Path.home(), "eadwulf", "world", path, "chunks")

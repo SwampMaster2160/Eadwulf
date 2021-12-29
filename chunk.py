@@ -1,4 +1,5 @@
-from typing import List
+import threading
+from typing import List, Optional
 
 from chunk_pos import ChunkPos
 from tile_pos import TilePos
@@ -20,3 +21,15 @@ class Chunk:
 
 	def __setitem__(self, key: TilePos, value: TileStack):
 		self.tile_stacks[key.y * 64 + key.x] = value
+
+
+class ChunkGeneratorThread(threading.Thread):
+	chunk: Optional[Chunk] = None
+	pos: ChunkPos
+
+	def __init__(self, pos: ChunkPos):
+		super().__init__()
+		self.pos = pos
+
+	def run(self) -> None:
+		self.chunk = Chunk(self.pos)

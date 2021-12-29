@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import texture
 import tile
@@ -10,7 +10,10 @@ from world_renderer import WorldRenderer
 class TileStack:
 	tiles: List[Tile] = []
 
-	def __init__(self, pos: TilePos):
+	def __init__(self, pos: Optional[TilePos]):
+		if pos is None:
+			self.tiles = []
+			return
 		ground_height = pos.perlin(420420, 1, 5, 0)
 		sand_type_map = pos.perlin(420420, 4, 6, 4)
 		if ground_height < 16:

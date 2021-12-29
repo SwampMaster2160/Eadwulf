@@ -1,6 +1,5 @@
 import itertools
 import os
-import pathlib
 import time
 
 import pygame as pg
@@ -116,7 +115,9 @@ def main():
 			game_state = GameState.IN_MENU
 			current_gui_menu = gui_menu.PauseGUIMenu(world)
 		elif game_state == GameState.IN_MENU:
-			game_state, current_gui_menu = current_gui_menu.tick(Keyboard(keys_pressed, keys_pressed_this_frame, new_text), mouse_state, world)
+			game_state, current_gui_menu = current_gui_menu.tick(
+				Keyboard(keys_pressed, keys_pressed_this_frame, new_text), mouse_state, world
+			)
 
 		keys_pressed_last_frame = keys_pressed
 		
