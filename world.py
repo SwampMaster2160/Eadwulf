@@ -77,7 +77,6 @@ class World:
 
 	def save(self):
 		save_delete_pos = self.player.pos.get_chunk_pos()
-		print("Save")
 		world_path = os.path.join(pathlib.Path.home(), "eadwulf", "world", self.filepath, "chunks")
 		os.makedirs(world_path, exist_ok=1)
 		to_del = []

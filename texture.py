@@ -14,6 +14,10 @@ class WaterTexture(Texture):
 	FILENAME = "water"
 
 
+class WaterNoUnderTexture(Texture):
+	FILENAME = "water_no_under"
+
+
 class TreeTexture(Texture):
 	FILENAME = "tree"
 

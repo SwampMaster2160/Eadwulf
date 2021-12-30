@@ -16,9 +16,7 @@ class TileStack:
 			return
 		ground_height = pos.perlin(420420, 1, 5, 0)
 		sand_type_map = pos.perlin(420420, 4, 6, 4)
-		if ground_height < 16:
-			self.tiles = [tile.WaterTile()]
-		elif ground_height < 18:
+		if ground_height < 18:
 			if sand_type_map < 24:
 				self.tiles = [tile.SandTile()]
 			elif sand_type_map < 32:
@@ -34,10 +32,12 @@ class TileStack:
 				self.tiles.append(tile.TreeTile())
 			elif foliage_map > 0.85:
 				self.tiles.append(tile.FlowersTile())
+		if ground_height < 16:
+			self.tiles.append(tile.WaterTile())
 
 	def render(self, world_renderer: WorldRenderer, pos: TilePos):
-		for chunk_tile in self.tiles:
-			chunk_tile.render(world_renderer, pos)
+		for x, chunk_tile in enumerate(self.tiles):
+			chunk_tile.render(world_renderer, pos, self, x)
 		if not self.tiles:
 			world_renderer.render_texture(texture.PitBottomTexture, pos.get_pixel_pos())
 
