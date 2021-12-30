@@ -17,6 +17,7 @@ class World:
 	chunks: dict = {}
 	do_save_world: bool = 0
 	ticks_since_last_save: int = 0
+	rendered_width_in_tiles: int = 0
 
 	def start_using_generated_chunks(self):
 		for pos, generating_chunk in self.chunks.items():
@@ -32,6 +33,7 @@ class World:
 			self.ticks_since_last_save = 0
 
 	def render(self, world_renderer: WorldRenderer):
+		self.rendered_width_in_tiles = world_renderer.world_surface_width_in_tiles
 		self.start_using_generated_chunks()
 		for y in range(self.player.pos.y - 9, self.player.pos.y + 10):
 			offset = -(world_renderer.world_surface_width_in_tiles // 2) + self.player.pos.x
@@ -86,6 +88,8 @@ class World:
 				pickle.dump(chunk, file)
 				file.close()
 				if pos[1] < save_delete_pos.y - 1 or save_delete_pos.y + 1 < pos[1]:
+					to_del.append(pos)
+				if pos[1] < save_delete_pos.x - (self.rendered_width_in_tiles // 2) - 1 or save_delete_pos.x + (self.rendered_width_in_tiles // 2) + 1 < pos[1]:
 					to_del.append(pos)
 		for pos in to_del:
 			del self.chunks[pos]

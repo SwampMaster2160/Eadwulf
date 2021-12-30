@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Sequence, List
+from typing import List
 
 import pygame as pg
 
