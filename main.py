@@ -11,6 +11,7 @@ from game_state import GameState
 from gui_renderer import GUIRenderer
 from keyboard import Keyboard
 from mouse_state import MouseState
+from simple_thread import SimpleThread
 from texture import Texture
 from world import World
 from world_renderer import WorldRenderer
@@ -86,7 +87,7 @@ def main():
 				case pg.MOUSEBUTTONDOWN:
 					if event.button == pg.BUTTON_LEFT:
 						mouse_state.is_clicked = 1
-		
+
 		# Game ticks
 		time_ns = time.time_ns()
 		delta_time = time_ns - last_time + tick_time_carry
@@ -123,14 +124,18 @@ def main():
 		
 		# Render game
 		world_renderer = WorldRenderer(main_surface, texture_dict, world.player)
-		
-		world.render(world_renderer)
+
+		world_render_thread = SimpleThread(World.render, (world, world_renderer))
+		world_render_thread.start()
+
 		match game_state:
 			case GameState.INGAME:
 				world.player.render_gui(gui_renderer)
 			case GameState.IN_MENU:
 				current_gui_menu.render(gui_renderer)
-		
+
+		world_render_thread.join()
+
 		world_renderer.blit_onto_main_surface(main_surface, world.player)
 		gui_renderer.blit_onto_main_surface(main_surface)
 		pg.display.flip()

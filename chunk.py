@@ -1,3 +1,6 @@
+import os
+import pathlib
+import pickle
 import threading
 from typing import List, Optional
 
@@ -23,13 +26,22 @@ class Chunk:
 		self.tile_stacks[key.y * 64 + key.x] = value
 
 
-class ChunkGeneratorThread(threading.Thread):
+class ChunkGetterThread(threading.Thread):
 	chunk: Optional[Chunk] = None
 	pos: ChunkPos
+	world_filename: str
 
-	def __init__(self, pos: ChunkPos):
+	def __init__(self, pos: ChunkPos, world_filename: str):
 		super().__init__()
 		self.pos = pos
+		self.world_filename = world_filename
 
 	def run(self) -> None:
-		self.chunk = Chunk(self.pos)
+		try:
+			world_path = os.path.join(pathlib.Path.home(), "eadwulf", "world", self.world_filename, "chunks")
+			filename = f"{self.pos.get_tuple()[0]}_{self.pos.get_tuple()[1]}.ech"
+			file = open(os.path.join(world_path, filename), "rb")
+			self.chunk = pickle.load(file)
+			file.close()
+		except FileNotFoundError:
+			self.chunk = Chunk(self.pos)

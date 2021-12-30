@@ -2,7 +2,7 @@ import os
 import pathlib
 import pickle
 
-from chunk import Chunk, ChunkGeneratorThread
+from chunk import ChunkGetterThread, Chunk
 from keyboard import Keyboard
 from player import Player
 from tile_pos import TilePos
@@ -15,17 +15,12 @@ class World:
 	filepath: str = ""
 	player: Player = Player()
 	chunks: dict = {}
-	generating_chunks = {}
 	do_save_world: bool = 0
 
 	def start_using_generated_chunks(self):
-		to_remove = []
-		for pos, generating_chunk in self.generating_chunks.items():
-			if not generating_chunk.is_alive():
+		for pos, generating_chunk in self.chunks.items():
+			if isinstance(generating_chunk, ChunkGetterThread) and not generating_chunk.is_alive():
 				self.chunks[pos] = generating_chunk.chunk
-				to_remove.append(pos)
-		for chunk_pos in to_remove:
-			del self.generating_chunks[chunk_pos]
 
 	def tick(self, keyboard: Keyboard):
 		self.start_using_generated_chunks()
@@ -43,13 +38,10 @@ class World:
 	def __getitem__(self, item: TilePos) -> TileStack:
 		chunk_pos = item.get_chunk_pos().get_tuple()
 		if chunk_pos not in self.chunks:
-			self.generating_chunks[chunk_pos] = ChunkGeneratorThread(item.get_chunk_pos())
-			self.generating_chunks[chunk_pos].start()
-			self.chunks[chunk_pos] = None
+			self.chunks[chunk_pos] = ChunkGetterThread(item.get_chunk_pos(), self.filepath)
+			self.chunks[chunk_pos].start()
 			return TileStack(None)
-			# self.chunks[chunk_pos] = Chunk(item.get_chunk_pos())
-			# return self.chunks[chunk_pos][item.get_chunk_offset()]
-		elif self.chunks[chunk_pos] is None:
+		elif isinstance(self.chunks[chunk_pos], ChunkGetterThread):
 			return TileStack(None)
 		return self.chunks[chunk_pos][item.get_chunk_offset()]
 
@@ -66,7 +58,6 @@ class World:
 		self.name = filename
 		self.filepath = filename
 		self.chunks = {}
-		self.generating_chunks = {}
 		self.do_save_world = 1
 		self.player = Player()
 		return 1
@@ -74,23 +65,15 @@ class World:
 	def load(self, path: str):
 		self.filepath = path
 		self.chunks = {}
-		self.generating_chunks = {}
 		self.player = Player()
 		self.do_save_world = 1
-		world_path = os.path.join(pathlib.Path.home(), "eadwulf", "world", path, "chunks")
-		for chunk_name in os.listdir(os.path.join(world_path)):
-			chunk_path = os.path.join(world_path, chunk_name)
-			file = open(chunk_path, "rb")
-			poses = chunk_name.split("_")
-			pos = (int(poses[0]), int(poses[1].split(".")[0]))
-			self.chunks[pos] = pickle.load(file)
-			file.close()
 
 	def save(self):
 		world_path = os.path.join(pathlib.Path.home(), "eadwulf", "world", self.filepath, "chunks")
 		os.makedirs(world_path, exist_ok=1)
 		for pos, chunk in self.chunks.items():
-			filename = f"{pos[0]}_{pos[1]}.ech"
-			file = open(os.path.join(world_path, filename), "wb")
-			pickle.dump(chunk, file)
-			file.close()
+			if isinstance(chunk, Chunk):
+				filename = f"{pos[0]}_{pos[1]}.ech"
+				file = open(os.path.join(world_path, filename), "wb")
+				pickle.dump(chunk, file)
+				file.close()
