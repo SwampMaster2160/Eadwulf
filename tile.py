@@ -1,4 +1,5 @@
 import texture
+from player_state import PlayerState
 from tile_pos import TilePos
 from world_renderer import WorldRenderer
 
@@ -31,10 +32,17 @@ class WaterTile(GroundTile):
 			world_renderer.render_texture(texture.WaterNoUnderTexture, pos.get_pixel_pos())
 		world_renderer.render_texture(self.TEXTURE, pos.get_pixel_pos())
 
+	def can_walk(self, player):
+		return player.player_state == PlayerState.BOAT_IDLE
+
 
 class TreeTile(Tile):
 	TEXTURE = texture.TreeTexture
 	CAN_WALK = 0
+
+
+class BushTile(TreeTile):
+	TEXTURE = texture.BushTexture
 
 
 class SandTile(GroundTile):

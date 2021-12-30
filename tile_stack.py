@@ -28,8 +28,10 @@ class TileStack:
 		else:
 			self.tiles = [tile.GrassTile()]
 			foliage_map = pos.random(420420, 7)
-			if foliage_map > 0.95:
+			if foliage_map > 0.97:
 				self.tiles.append(tile.TreeTile())
+			elif foliage_map > 0.95:
+				self.tiles.append(tile.BushTile())
 			elif foliage_map > 0.85:
 				self.tiles.append(tile.FlowersTile())
 		if ground_height < 16:

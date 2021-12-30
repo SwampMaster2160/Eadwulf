@@ -10,13 +10,9 @@ from gui_renderer import GUIRenderer, GUITextureAlign
 from item import Item
 from keyboard import Keyboard
 from pixel_pos import PixelPos
+from player_state import PlayerState
 from tile_pos import TilePos
 from world_renderer import WorldRenderer
-
-
-class PlayerState(Enum):
-	IDLE = 0
-	WALKING = auto()
 
 
 class CardinalDirection(Enum):
@@ -70,6 +66,7 @@ class Player:
 		self.inventory[6] = item.TileItem(tile.GravelTile())
 		self.inventory[7] = item.TileItem(tile.WaterTile())
 		self.inventory[8] = item.TileItem(tile.PathTile())
+		self.inventory[9] = item.BoatItem()
 	
 	def tick(self, keyboard: Keyboard, world):
 		# Inventory
@@ -94,7 +91,7 @@ class Player:
 		match self.player_state:
 			case PlayerState.IDLE:
 				if keyboard.keys_pressed_starting_now[pg.K_RETURN] or keyboard.keys_pressed[pg.K_LALT] and keyboard.keys_pressed[pg.K_RETURN]:
-					self.inventory[self.selected_item].use(world[self.looking_at_pos()])
+					self.inventory[self.selected_item].use(self, world[self.looking_at_pos()])
 				is_w_pressed = keyboard.keys_pressed[pg.K_w]
 				is_a_pressed = keyboard.keys_pressed[pg.K_a]
 				is_s_pressed = keyboard.keys_pressed[pg.K_s]
@@ -123,6 +120,51 @@ class Player:
 				self.offset += 1
 				if self.offset > 15:
 					self.player_state = PlayerState.IDLE
+					self.offset = 0
+					match self.traveling:
+						case CardinalDirection.NORTH:
+							self.pos.y -= 1
+						case CardinalDirection.EAST:
+							self.pos.x += 1
+						case CardinalDirection.SOUTH:
+							self.pos.y += 1
+						case CardinalDirection.WEST:
+							self.pos.x -= 1
+			case PlayerState.BOAT_IDLE:
+				if keyboard.keys_pressed_starting_now[pg.K_RETURN] or keyboard.keys_pressed[pg.K_LALT] and \
+						keyboard.keys_pressed[pg.K_RETURN]:
+					self.inventory[self.selected_item].use(self, world[self.looking_at_pos()])
+				is_w_pressed = keyboard.keys_pressed[pg.K_w]
+				is_a_pressed = keyboard.keys_pressed[pg.K_a]
+				is_s_pressed = keyboard.keys_pressed[pg.K_s]
+				is_d_pressed = keyboard.keys_pressed[pg.K_d]
+				if is_w_pressed:
+					self.traveling = CardinalDirection.NORTH
+					if not keyboard.keys_pressed[pg.K_LCTRL]:
+						self.facing = CardinalDirection.NORTH
+				elif is_a_pressed:
+					self.traveling = CardinalDirection.WEST
+					if not keyboard.keys_pressed[pg.K_LCTRL]:
+						self.facing = CardinalDirection.WEST
+				elif is_s_pressed:
+					self.traveling = CardinalDirection.SOUTH
+					if not keyboard.keys_pressed[pg.K_LCTRL]:
+						self.facing = CardinalDirection.SOUTH
+				elif is_d_pressed:
+					self.traveling = CardinalDirection.EAST
+					if not keyboard.keys_pressed[pg.K_LCTRL]:
+						self.facing = CardinalDirection.EAST
+				if world[self.traveling_to_pos()].can_walk(self) and \
+						(is_w_pressed or is_a_pressed or is_s_pressed or is_d_pressed) and not keyboard.keys_pressed[
+					pg.K_LSHIFT]:
+					self.player_state = PlayerState.BOAT_SAILING
+					self.offset = 1
+			case PlayerState.BOAT_SAILING:
+				self.offset += 1
+				if self.offset > 15:
+					self.player_state = PlayerState.BOAT_IDLE
+					if not isinstance(world[self.traveling_to_pos()].tiles[-1], tile.WaterTile):
+						self.player_state = PlayerState.IDLE
 					self.offset = 0
 					match self.traveling:
 						case CardinalDirection.NORTH:
@@ -166,13 +208,24 @@ class Player:
 
 	def render(self, world_renderer: WorldRenderer):
 		player_texture = None
-		match self.facing:
-			case CardinalDirection.NORTH:
-				player_texture = texture.PlayerNorthTexture
-			case CardinalDirection.EAST:
-				player_texture = texture.PlayerEastTexture
-			case CardinalDirection.SOUTH:
-				player_texture = texture.PlayerSouthTexture
-			case CardinalDirection.WEST:
-				player_texture = texture.PlayerWestTexture
+		if self.player_state == PlayerState.BOAT_IDLE or self.player_state == PlayerState.BOAT_SAILING:
+			match self.facing:
+				case CardinalDirection.NORTH:
+					player_texture = texture.BoatNorthTexture
+				case CardinalDirection.EAST:
+					player_texture = texture.BoatEastTexture
+				case CardinalDirection.SOUTH:
+					player_texture = texture.BoatSouthTexture
+				case CardinalDirection.WEST:
+					player_texture = texture.BoatWestTexture
+		else:
+			match self.facing:
+				case CardinalDirection.NORTH:
+					player_texture = texture.PlayerNorthTexture
+				case CardinalDirection.EAST:
+					player_texture = texture.PlayerEastTexture
+				case CardinalDirection.SOUTH:
+					player_texture = texture.PlayerSouthTexture
+				case CardinalDirection.WEST:
+					player_texture = texture.PlayerWestTexture
 		world_renderer.render_texture(player_texture, self.get_offset_x_and_y() + self.pos.get_pixel_pos())

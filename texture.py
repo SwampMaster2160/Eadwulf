@@ -58,6 +58,22 @@ class PlayerWestTexture(Texture):
 	FILENAME = "player_west"
 
 
+class BoatNorthTexture(Texture):
+	FILENAME = "boat_north"
+
+
+class BoatEastTexture(Texture):
+	FILENAME = "boat_east"
+
+
+class BoatSouthTexture(Texture):
+	FILENAME = "boat_south"
+
+
+class BoatWestTexture(Texture):
+	FILENAME = "boat_west"
+
+
 class HammerTexture(Texture):
 	FILENAME = "hammer"
 
@@ -76,3 +92,7 @@ class SelectTexture(Texture):
 
 class FlowersTexture(Texture):
 	FILENAME = "flowers"
+
+
+class BushTexture(Texture):
+	FILENAME = "bush"
