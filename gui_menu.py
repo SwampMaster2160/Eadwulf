@@ -11,7 +11,7 @@ from gui_element import GUIElement
 from gui_renderer import GUIRenderer
 from keyboard import Keyboard
 from mouse_over_state import MouseOverState
-from mouse_state import MouseState
+from mouse import Mouse
 from world import World
 
 
@@ -26,7 +26,7 @@ class GUIMenu:
 		return None
 
 	def tick(
-			self, keyboard: Keyboard, mouse: MouseState, world: World
+			self, keyboard: Keyboard, mouse: Mouse, world: World
 	) -> Tuple[GameState, any]:
 		for element in self.instance_elements:
 			element.tick(keyboard)

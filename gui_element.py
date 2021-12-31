@@ -3,7 +3,7 @@ from game_state import GameState
 from gui_renderer import GUIRenderer, GUITextureAlign
 from keyboard import Keyboard
 from mouse_over_state import MouseOverState
-from mouse_state import MouseState
+from mouse import Mouse
 from pixel_pos import PixelPos
 from world import World
 
@@ -20,7 +20,7 @@ class GUIElement:
 	def click_off(self):
 		pass
 
-	def is_mouse_over(self, mouse: MouseState) -> bool:
+	def is_mouse_over(self, mouse: Mouse) -> bool:
 		return 0
 
 	def render(self, gui_renderer: GUIRenderer):
@@ -67,7 +67,7 @@ class ButtonGUIElement(GUIElement):
 		self.size = size
 		self.align = align
 
-	def is_mouse_over(self, mouse: MouseState) -> bool:
+	def is_mouse_over(self, mouse: Mouse) -> bool:
 		mouse_pos = mouse.pos_on_gui_surfaces[self.align]
 		return self.pos.x < mouse_pos.x < self.pos.x + self.size.x and\
 			self.pos.y < mouse_pos.y < self.pos.y + self.size.y
@@ -226,7 +226,7 @@ class TextEntryGUIElement(GUIElement):
 		self.align = align
 		self.info_text = info_text
 
-	def is_mouse_over(self, mouse: MouseState) -> bool:
+	def is_mouse_over(self, mouse: Mouse) -> bool:
 		mouse_pos = mouse.pos_on_gui_surfaces[self.align]
 		return self.pos.x < mouse_pos.x < self.pos.x + self.size.x and\
 			self.pos.y < mouse_pos.y < self.pos.y + self.size.y

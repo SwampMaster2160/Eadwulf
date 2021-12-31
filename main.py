@@ -10,14 +10,11 @@ from font_page import FontPage
 from game_state import GameState
 from gui_renderer import GUIRenderer
 from keyboard import Keyboard
-from mouse_state import MouseState
+from mouse import Mouse
 from simple_thread import SimpleThread
 from texture import Texture
 from world import World
 from world_renderer import WorldRenderer
-
-
-KEYCODES = [pg.K_LEFT, pg.K_RIGHT, pg.K_UP, pg.K_DOWN, pg.K_RETURN, pg.K_ESCAPE]
 
 
 def main():
@@ -31,11 +28,8 @@ def main():
 	# Init game vars
 	last_time = time.time_ns()
 	tick_time_carry = 0
-	keys_pressed_last_tick = pg.key.get_pressed()
-	keys_pressed_last_frame = pg.key.get_pressed()
-	mouse_state = MouseState()
-
-	# print(pathlib.Path.home())
+	keyboard = Keyboard()
+	mouse = Mouse()
 
 	world = World()
 	game_state = GameState.IN_MENU
@@ -58,7 +52,7 @@ def main():
 	# Main game loop
 	running = 1
 	while running:
-		new_text = ""
+		keyboard.new_text = ""
 		# Poll window events
 		for event in pg.event.get():
 			match event.type:
@@ -68,7 +62,7 @@ def main():
 					world.do_save_world = 0
 					running = 0
 				case pg.KEYDOWN:
-					new_text += event.unicode
+					keyboard.new_text += event.unicode
 				case pg.KEYUP:
 					match event.key:
 						case pg.K_F11:
@@ -79,48 +73,35 @@ def main():
 							else:
 								main_surface = pg.display.set_mode(windowed_size, pg.RESIZABLE, vsync=1)
 				case pg.MOUSEMOTION:
-					mouse_state.pos = event.pos
+					mouse.pos = event.pos
 				case pg.MOUSEBUTTONUP:
 					if event.button == pg.BUTTON_LEFT:
-						mouse_state.is_clicked_starting_this_frame = 1
-						mouse_state.is_clicked = 0
+						mouse.is_clicked_starting_this_frame = 1
+						mouse.is_clicked = 0
 				case pg.MOUSEBUTTONDOWN:
 					if event.button == pg.BUTTON_LEFT:
-						mouse_state.is_clicked = 1
+						mouse.is_clicked = 1
 
 		# Game ticks
 		time_ns = time.time_ns()
 		delta_time = time_ns - last_time + tick_time_carry
 		last_time = time_ns
-		keys_pressed = pg.key.get_pressed()
 		for x in range(delta_time // 10000000):
-			keys_pressed_this_tick = {}
-			for key in KEYCODES:
-				keys_pressed_this_tick[key] = keys_pressed[key] and not keys_pressed_last_tick[key]
-
+			keyboard.get_ready_for_tick()
 			if game_state == GameState.INGAME:
-				world.tick(Keyboard(keys_pressed, keys_pressed_this_tick, new_text))
-
-			keys_pressed_last_tick = keys_pressed
+				world.tick(keyboard)
 		tick_time_carry = delta_time % 10000000
 
 		# Each frame (Not rendering)
 		gui_renderer = GUIRenderer(texture_dict, font_pages)
-		mouse_state.calculate_surface_poses(main_surface.get_size(), gui_renderer)
+		mouse.calculate_surface_poses(main_surface.get_size(), gui_renderer)
+		keyboard.get_ready_for_frame()
 
-		keys_pressed_this_frame = {}
-		for key in KEYCODES:
-			keys_pressed_this_frame[key] = keys_pressed[key] and not keys_pressed_last_frame[key]
-
-		if keys_pressed_this_frame[pg.K_ESCAPE] and game_state == GameState.INGAME:
+		if keyboard.keys_pressed_starting_now[pg.K_ESCAPE] and game_state == GameState.INGAME:
 			game_state = GameState.IN_MENU
 			current_gui_menu = gui_menu.PauseGUIMenu(world)
 		elif game_state == GameState.IN_MENU:
-			game_state, current_gui_menu = current_gui_menu.tick(
-				Keyboard(keys_pressed, keys_pressed_this_frame, new_text), mouse_state, world
-			)
-
-		keys_pressed_last_frame = keys_pressed
+			game_state, current_gui_menu = current_gui_menu.tick(keyboard, mouse, world)
 		
 		# Render game
 		world_renderer = WorldRenderer(main_surface, texture_dict, world.player)
@@ -141,7 +122,7 @@ def main():
 		pg.display.flip()
 
 		# End
-		mouse_state.is_clicked_starting_this_frame = 0
+		mouse.is_clicked_starting_this_frame = 0
 
 		if game_state == GameState.EXITING:
 			pg.event.post(Event(pg.QUIT))
