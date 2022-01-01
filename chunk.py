@@ -12,12 +12,12 @@ from tile_stack import TileStack
 class Chunk:
 	tile_stacks: List[TileStack]
 
-	def __init__(self, pos: ChunkPos):
+	def __init__(self, pos: ChunkPos, seed: int):
 		self.tile_stacks = [TileStack(TilePos(0, 0))] * 4096
 		for y in range(pos.y * 64, pos.y * 64 + 64):
 			for x in range(pos.x * 64, pos.x * 64 + 64):
 				tile_pos = TilePos(x, y)
-				self[tile_pos.get_chunk_offset()] = TileStack(tile_pos)
+				self[tile_pos.get_chunk_offset()] = TileStack(tile_pos, seed)
 
 	def __getitem__(self, item: TilePos):
 		return self.tile_stacks[item.y * 64 + item.x]
@@ -30,11 +30,13 @@ class ChunkGetterThread(threading.Thread):
 	chunk: Optional[Chunk] = None
 	pos: ChunkPos
 	world_filename: str
+	seed: int
 
-	def __init__(self, pos: ChunkPos, world_filename: str):
+	def __init__(self, pos: ChunkPos, world_filename: str, seed: int):
 		super().__init__()
 		self.pos = pos
 		self.world_filename = world_filename
+		self.seed = seed
 
 	def run(self) -> None:
 		try:
@@ -44,4 +46,4 @@ class ChunkGetterThread(threading.Thread):
 			self.chunk = pickle.load(file)
 			file.close()
 		except FileNotFoundError:
-			self.chunk = Chunk(self.pos)
+			self.chunk = Chunk(self.pos, self.seed)

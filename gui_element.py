@@ -171,7 +171,9 @@ class NewWorldFinalizeButton(ButtonGUIElement):
 	TEXT = "Create New World"
 
 	def click(self, world: World, parent_gui_menu):
-		if world.new(parent_gui_menu.instance_elements[1].text_entered):
+		if world.new(
+				parent_gui_menu.instance_elements[1].text_entered, parent_gui_menu.instance_elements[2].text_entered
+		):
 			return GameState.INGAME, self
 		return None
 

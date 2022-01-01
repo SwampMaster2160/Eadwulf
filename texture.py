@@ -96,3 +96,7 @@ class FlowersTexture(Texture):
 
 class BushTexture(Texture):
 	FILENAME = "bush"
+
+
+class ChunkLoadingTexture(Texture):
+	FILENAME = "chunk_loading"

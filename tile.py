@@ -19,6 +19,11 @@ class GroundTile(Tile):
 	pass
 
 
+class ChunkLoadingTile(GroundTile):
+	TEXTURE = texture.ChunkLoadingTexture
+	CAN_WALK = 0
+
+
 class GrassTile(GroundTile):
 	TEXTURE = texture.GrassTexture
 

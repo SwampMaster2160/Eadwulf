@@ -82,6 +82,7 @@ class NewWorldGUIMenu(GUIMenu):
 	ELEMENTS = [
 		gui_element.RectGUIElement(),
 		gui_element.TextEntryGUIElement("Name: ", auto_place_y=0),
+		gui_element.TextEntryGUIElement("Seed: ", auto_place_y=1),
 		gui_element.TextGUIElement("Create New World?"),
 		gui_element.NewWorldFinalizeButton(auto_place_y=8),
 		gui_element.BackToMainMenuButton(auto_place_y=9)

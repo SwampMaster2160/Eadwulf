@@ -10,12 +10,12 @@ from world_renderer import WorldRenderer
 class TileStack:
 	tiles: List[Tile] = []
 
-	def __init__(self, pos: Optional[TilePos]):
+	def __init__(self, pos: Optional[TilePos], seed: Optional[int] = None):
 		if pos is None:
-			self.tiles = []
+			self.tiles = [tile.ChunkLoadingTile()]
 			return
-		ground_height = pos.perlin(420420, 1, 5, 0)
-		sand_type_map = pos.perlin(420420, 4, 6, 4)
+		ground_height = pos.perlin(seed, 1, 5, 0)
+		sand_type_map = pos.perlin(seed, 4, 6, 4)
 		if ground_height < 18:
 			if sand_type_map < 24:
 				self.tiles = [tile.SandTile()]
@@ -27,7 +27,7 @@ class TileStack:
 			self.tiles = [tile.GrassTile(), tile.TreeTile()]
 		else:
 			self.tiles = [tile.GrassTile()]
-			foliage_map = pos.random(420420, 7)
+			foliage_map = pos.random(seed, 7)
 			if foliage_map > 0.97:
 				self.tiles.append(tile.TreeTile())
 			elif foliage_map > 0.95:
